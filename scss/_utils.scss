@@ -3,59 +3,50 @@ $dark-color: black;
 $soft-dark-color: #00000033;
 $medium-dark-color: #00000098;
 
-$primary-color:#fff;
-$secondary-color:black;
-$light-color:#f6f6f6;
-$medium-color:black;
+$primary-color: #fff;
+$secondary-color: black;
+$light-color: #f6f6f6;
+$medium-color: black;
 
+$text-color: #f6f6f6;
+$text-shadow-color: #f6f6f6;
 
+$fontsize: 1rem;
+$fontsize2: 2rem;
 
-$text-color:#f6f6f6;
-$text-shadow-color:#f6f6f6;
-
-$fontsize:1.0rem;
-$fontsize2:2.0rem;
-
-$fontsize08:1.0rem;
-$fontsize06:0.8rem;
-
+$fontsize08: 1rem;
+$fontsize06: 0.8rem;
 
 $welcome-min-height: 496px;
-$welcome-min-width: 451px ;
-$welcome-card-content-min-width:381px;
-
-
+$welcome-min-width: 451px;
+$welcome-card-content-min-width: 381px;
 
 $gallery-min-height: 355px;
-$gallery-min-width: 451px ;
+$gallery-min-width: 451px;
 
 $player-min-height: 75px;
-$player-min-width: 693px ;
+$player-min-width: 693px;
 
 $social-min-height: 75px;
-$social-min-width: 448px ;
+$social-min-width: 448px;
 $welcome-min-height: 496px;
-$welcome-min-width: 451px ;
+$welcome-min-width: 451px;
 
+// Responsive
 
-// Responsive 
+$fontsize-responsive: 1rem;
+$fontsize2-responsive: 2rem;
 
+$fontsize08-responsive: 0.6rem;
+$fontsize06-responsive: 0.5rem;
 
-$fontsize-responsive:1.0rem;
-$fontsize2-responsive:2.0rem;
-
-$fontsize08-responsive:0.6rem;
-$fontsize06-responsive:0.5rem;
-
-
-$welcome-card-content-min-width-responsive:280px;
-
+$welcome-card-content-min-width-responsive: 280px;
 
 $gallery-min-height-responsive: 255px;
-$gallery-min-width-responsive: 310px ;
+$gallery-min-width-responsive: 310px;
 
 $player-min-height-responsive: 75px;
-$player-min-width-responsive: 693px ;
+$player-min-width-responsive: 693px;
 
 $social-min-height-responsive: 65px;
-$social-min-width-responsive: 248px ;
+$social-min-width-responsive: 248px;

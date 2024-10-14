@@ -1,21 +1,20 @@
 // en üstteki logo ve metin alanını kapsayan header için
 
 .header {
-  height: 10%;
+  height: 100% !important;
 
   display: flex;
   align-items: flex-start;
   // justify-content: space-between;
 
   flex: 1;
-  padding-left: 2%;
+  padding-left: 3%;
   width: 100%;
 
   padding-bottom: 0%;
-  padding-top: 1%;
+  padding-top: 3%;
 
   letter-spacing: 0.2rem;
-
 
   // border-radius: 0.2rem;
   // border-bottom: 0.2rem solid transparent;
@@ -53,7 +52,7 @@
   letter-spacing: normal;
   text-align: left;
   color: $text-color;
-  padding-top: 1%;
+  padding-top: 2%;
 }
 
 .header-text {
