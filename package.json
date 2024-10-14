@@ -1,15 +1,16 @@
 {
-  "name": "bs-loading-screen",
-  "version": "1.0.0",
+  "name": "mri_Qloadscreen",
+  "version": "1.0.1",
+  "description": "A simple loading screen component",
   "main": "index.js",
   "scripts": {
-    "scss": "node-sass -w scss -o public/css --output-style compressed"
+    "scss": "sass scss:public/css --style=compressed",
+    "dev": "sass -w scss:public/css --style=compressed"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["loading", "screen", "sass"],
+  "author": "mri",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "node-sass": "^9.0.0"
+    "sass": "^1.79.5"
   }
 }

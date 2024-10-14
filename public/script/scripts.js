@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (config.background.type === "video") {
         const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${config.background.url}?autoplay=1&mute=1&loop=1&playlist=${config.background.url}`;
+        iframe.src = `https://www.youtube.com/embed/${config.background.url}?cc_load_policy=3&autoplay=1&mute=1&loop=1&playlist=${config.background.url}`;
         iframe.frameBorder = "0";
         iframe.allow = "autoplay; encrypted-media";
         iframe.allowFullscreen = true;
