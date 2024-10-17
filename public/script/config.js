@@ -1,7 +1,7 @@
 const config = {
   autoSlideInterval: 3000, // Tempo de transição automática de slides (ms)
   autoPlay: true, // Valor booleano para controlar a reprodução automática
-  musicVolume: 0.50, // Nível de volume padrão (0 = 0%; 0,5 = 50%; 1 = 100%)
+  musicVolume: 0.05, // Nível de volume padrão (0 = 0%; 0,5 = 50%; 1 = 100%)
   background: {
     type: "video", // "imagem" ou "vídeo"
     url: "QdBZY2fkU-0", // ID do vídeo do YouTube ou caminho do arquivo de imagem

@@ -339,6 +339,7 @@ function formatTime(seconds) {
 
 
 
+
 function setHeaderText() {
     document.getElementById('header-title').innerText = config.locales.headerTitle;
     document.getElementById('header-subtitle').innerText = config.locales.headerSubtitle;
