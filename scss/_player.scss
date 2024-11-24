@@ -3,13 +3,10 @@
 .bottom-box {
   display: flex;
   flex-direction: row;
-
-  margin-left: 30%;
   position: absolute;
+  left: 30%;
   bottom: 4.3%;
-
   box-sizing: border-box;
-
   height: 4.5rem;
 }
 
