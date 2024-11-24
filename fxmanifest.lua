@@ -7,7 +7,7 @@ description 'Simple Loading Screen'
 credits 'Beta Studio'
 
 lua54 'yes'
-version '2.0.2' 
+version '2.0.3' 
 
 loadscreen 'public/index.html'
 loadscreen_cursor 'yes'
