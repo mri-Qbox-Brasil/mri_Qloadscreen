@@ -11,7 +11,7 @@ version '2.0.3'
 
 loadscreen 'public/index.html'
 loadscreen_cursor 'yes'
-loadscreen_manual_shutdown 'yes'
+loadscreen_manual_shutdown 'false'
 
 files {
 	'public/**',
