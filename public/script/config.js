@@ -3,8 +3,8 @@ const config = {
   autoPlay: true, // Valor booleano para controlar a reprodução automática
   musicVolume: 0.05, // Nível de volume padrão (0 = 0%; 0,5 = 50%; 1 = 100%)
   background: {
-    type: "video", // "imagem" ou "vídeo"
-    url: "QdBZY2fkU-0", // ID do vídeo do YouTube ou caminho do arquivo de imagem
+    type: "videoPasta", // "imagem" ou "video" ou "videoPasta"
+    url: "QdBZY2fkU-0", // ID do vídeo do YouTube ou caminho do arquivo de imagem ou caminho do arquivo de video 
     videoProvider: "youtube", // Apenas para vídeos do YouTube
   },
   socialMedia: [
