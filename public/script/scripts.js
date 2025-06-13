@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
         socialMediaLinksElement.appendChild(listItem);
     });
 
-    if (config.background.type === "YouTubeId") {
+    if (config.background.type === "video") {
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${config.background.url}?cc_load_policy=3&autoplay=1&mute=1&loop=1&controls=0&playlist=${config.background.url}`;
         iframe.frameBorder = "0";
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         iframe.style.top = "0";
         iframe.style.left = "0";
         backgroundElement.appendChild(iframe);
-    } else if (config.background.type === "VideoPasta") {
+    } else if (config.background.type === "videoPasta") {
         const video = document.createElement("video");
         video.src = config.background.url;
         video.autoplay = config.autoPlay;
