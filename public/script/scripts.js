@@ -9,18 +9,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const fullscreenImg = document.querySelector('.fullscreen-img');
     const closeBtn = document.querySelector('.close-btn');
     let currentIndex = 0;
-    const images = config.images; 
+    const images = config.images;
 
     let autoSlideInterval;
 
     function loadImages() {
         slidesContainer.innerHTML = '';
-        sliderContainer.innerHTML = ''; 
+        sliderContainer.innerHTML = '';
 
         images.forEach((image, index) => {
             const img = document.createElement('img');
             img.src = image;
-            img.addEventListener('click', () => openFullscreen(index)); 
+            img.addEventListener('click', () => openFullscreen(index));
             slidesContainer.appendChild(img);
         });
 
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function startAutoSlide() {
         autoSlideInterval = setInterval(() => {
             nextImage();
-        }, config.autoSlideInterval); 
+        }, config.autoSlideInterval);
     }
 
     function resetAutoSlide() {
@@ -128,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const { headerSubtitles, cardTitles, cardDescriptions, serverGalleryTitle, serverGalleryDescription, socialMediaText, socialMediaLinkText, socialMediaLinkURL } = config.locales;
 
-   
+
     const randomHeaderSubtitleIndex = Math.floor(Math.random() * headerSubtitles.length);
     const randomHeaderSubtitle = headerSubtitles[randomHeaderSubtitleIndex];
 
-   
+
     const randomIndex = Math.floor(Math.random() * cardTitles.length);
     const randomTitle = cardTitles[randomIndex];
     const randomDescription = cardDescriptions[randomIndex];
@@ -151,10 +151,10 @@ document.addEventListener('DOMContentLoaded', function () {
     config.socialMedia.forEach(media => {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
-        link.href = "#"; 
-        link.addEventListener('click', function(event) {
+        link.href = "#";
+        link.addEventListener('click', function (event) {
             event.preventDefault();
-            navigator.clipboard.writeText(media.link).then(function() {
+            navigator.clipboard.writeText(media.link).then(function () {
                 showCopiedMessage(link, media.name);
             });
         });
@@ -166,9 +166,9 @@ document.addEventListener('DOMContentLoaded', function () {
         socialMediaLinksElement.appendChild(listItem);
     });
 
-    if (config.background.type === "video") {
+    if (config.background.type === "YouTubeId") {
         const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${config.background.url}?autoplay=1&mute=1&loop=1&playlist=${config.background.url}`;
+        iframe.src = `https://www.youtube.com/embed/${config.background.url}?cc_load_policy=3&autoplay=1&mute=1&loop=1&controls=0&playlist=${config.background.url}`;
         iframe.frameBorder = "0";
         iframe.allow = "autoplay; encrypted-media";
         iframe.allowFullscreen = true;
@@ -178,6 +178,21 @@ document.addEventListener('DOMContentLoaded', function () {
         iframe.style.top = "0";
         iframe.style.left = "0";
         backgroundElement.appendChild(iframe);
+    } else if (config.background.type === "VideoPasta") {
+        const video = document.createElement("video");
+        video.src = config.background.url;
+        video.autoplay = config.autoPlay;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.style.width = "100%";
+        video.style.height = "100%";
+        video.style.objectFit = "cover";
+        video.style.position = "absolute";
+        video.style.top = "0";
+        video.style.left = "0";
+        video.setAttribute("preload", "auto");
+        backgroundElement.appendChild(video);
     } else {
         backgroundElement.style.backgroundImage = `url(${config.background.url})`;
         backgroundElement.style.backgroundSize = "cover";
@@ -197,23 +212,18 @@ document.addEventListener('DOMContentLoaded', function () {
         message.style.left = '50%';
         message.style.transform = 'translateX(-50%)';
         message.style.padding = '5px 10px';
-   
+
         message.style.color = 'white';
         message.style.borderRadius = '5px';
         message.style.fontSize = '7px';
         element.parentElement.appendChild(message);
-        
+
         setTimeout(() => {
             message.remove();
         }, 2000);
     }
 
 });
-
-
-
-
-
 
 const playBtn = document.getElementById('play');
 const pauseBtn = document.getElementById('pause');
@@ -226,7 +236,7 @@ const durationElem = document.getElementById('duration');
 const songTitleElem = document.querySelector('.song-info h2');
 const songArtistElem = document.querySelector('.song-info p');
 const albumArtImg = document.getElementById('album-art-img');
-const volumeRange = document.getElementById('volume'); 
+const volumeRange = document.getElementById('volume');
 
 let isPlaying = false;
 let autoPlay = config.autoPlay
@@ -293,12 +303,12 @@ progress.addEventListener('input', () => {
 
 volume.addEventListener('input', () => {
     audio.volume = volume.value / 100;
-    
+
     updateVolumeDisplay(volume.value);
 });
 
 function updateVolumeDisplay(value) {
-   
+
     volumeRange.value = value;
 }
 
@@ -336,6 +346,7 @@ function formatTime(seconds) {
     const secs = Math.floor(seconds % 60);
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 }
+
 
 
 
