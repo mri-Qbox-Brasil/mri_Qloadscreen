@@ -3,8 +3,8 @@ const config = {
   autoPlay: true, // Valor booleano para controlar a reprodução automática
   musicVolume: 0.05, // Nível de volume padrão (0 = 0%; 0,5 = 50%; 1 = 100%)
   background: {
-    type: "videoPasta", // "imagem" ou "video" ou "videoPasta"
-    url: "QdBZY2fkU-0", // ID do vídeo do YouTube ou caminho do arquivo de imagem ou caminho do arquivo de video 
+    type: "video", // "imagem" ou "video" ou "videoPasta"
+    url: "QdBZY2fkU-0", // ID do vídeo do YouTube ou caminho do arquivo de imagem ou caminho do arquivo de video
     videoProvider: "youtube", // Apenas para vídeos do YouTube
   },
   socialMedia: [
@@ -77,7 +77,7 @@ const config = {
     cardDescriptions: [
       "Nosso objetivo é oferecer os melhores scripts e soluções para FIVEM de forma gratuita. Não vendemos nenhum tipo de conteúdo que está nessa base. Tudo aqui foi criado e disponibilizado por colaboradores da comunidade de FIVEM do mundo inteiro. Todos os direitos e créditos são de seus devidos autores.",
       "Descubra um novo jeito de gerenciar seu servidor! Nossa base oferece uma série de ferramentas in game para que você e sua staff possam ter mais independência na hora de criar sua cidade.",
-      "Precisando de ajuda para desenvolver algum script? Suporte para instalação ou configuração de algo na sua base? Entre em nosso discord e utilize os canais de ajuda para tirar suas dúvidas com todos da comunidade ou contrate nossa equipe de desenvolvedores! ", 
+      "Precisando de ajuda para desenvolver algum script? Suporte para instalação ou configuração de algo na sua base? Entre em nosso discord e utilize os canais de ajuda para tirar suas dúvidas com todos da comunidade ou contrate nossa equipe de desenvolvedores! ",
       // Você pode adicionar mais descrições
     ],
     serverGalleryTitle: "Memórias", // Título para a seção da galeria do servidor
