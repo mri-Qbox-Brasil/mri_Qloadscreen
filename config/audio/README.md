@@ -1,7 +1,7 @@
 # Pt-br
 # ----------
 # Esta pasta serve para armazenar o vídeo da sua tela de carregamento.
-# Por favor, coloque um arquivo de vídeo chamado "video.mp4" aqui.
+# Por favor, coloque um arquivo de vídeo chamado "audio.mp3" aqui.
 # configure em config/config.lua
 # file = 'meuvideo.mp4',  -- Coloque o NOME exato do vídeo que já está na pasta config/video/
 # musicName = 'Nome da Música',
@@ -9,9 +9,9 @@
 # audioLink = 'minhamusica.mp3', -- Coloque o NOME exato da música na pasta config/audio/
 
 # En
-# ----------
+# -------------
 # This folder is meant to store your loading screen video.
-# Please place a video file named "video.mp4" here.
+# Please place an audio file named "audio.mp3" here.
 # configure in config/config.lua
 # file = 'myvideo.mp4',  -- Put the exact NAME of the video that is already in the config/video/ folder
 # musicName = 'Song Name',

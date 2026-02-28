@@ -19,6 +19,7 @@ Config.Backgrounds = {
     --     audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/Matu-MEUCEMITRIO-30PRAUM(youtube).mp3',
     -- },
     {
+        file = 'video.mp4',
         musicName = 'FE!N',
         musicAuthor = 'Travis Scott',
         audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',
