@@ -13,21 +13,20 @@ Config.musicfolder = false   -- If true, plays music from config/audio/ folder (
 
 Config.Backgrounds = {
     {
-        file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/Fly.mp4',
-        musicName = 'FLY',
-        musicAuthor = 'FLYTUE',
+        file = '',
+        musicName = 'MRI',
+        musicAuthor = 'MRI',
         audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/Matu-MEUCEMITRIO-30PRAUM(youtube).mp3',
     },
-    -- {
-    --     file = 'bg.png',
-    --     musicName = 'FE!N',
-    --     musicAuthor = 'Travis Scott',
-    --     audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',
-    -- }
+    {
+        musicName = 'MRI',
+        musicAuthor = 'MRI',
+        audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',
+    }
 }
 
 Config.Texts = {
-    header_1 = 'BEM-VINDO A MRI QBOX',
+    header_1 = 'BEM-VINDO A MRI MRI',
     header_2 = 'Comunidade onde é levado a sério e suas ideias tentamos transformar em realidades!',
     discord = 'Discord',
     online = 'Online',
@@ -43,7 +42,7 @@ Config.ThemeConfig = {
     },
     Logo = {
         file = 'logo.png', -- Filename of the logo inside config/logo/
-        width = 80, -- Logo width in pixels
+        width = 300, -- Logo width in pixels
         height = -1, -- Logo height in pixels (-1 for auto)
     }
 }
