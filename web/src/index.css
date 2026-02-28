@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #d946ef;
+  --color-secondary: #a21caf;
+  --color-background-light: #1a1a1a;
+  --color-background-dark: #050505;
+  --color-surface-dark: rgba(20, 20, 20, 0.8);
+
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --background-image-grunge-pattern: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop');
+  --background-image-neon-shard: linear-gradient(135deg, transparent 40%, rgba(217, 70, 239, 0.3) 50%, transparent 60%);
+}
+
+@layer components {
+  .glass-panel {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .neon-text {
+      text-shadow: 0 0 10px rgba(217, 70, 239, 0.7), 0 0 20px rgba(217, 70, 239, 0.5);
+  }
+  .neon-box {
+      box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
+  }
+  .shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite linear;
+  }
+  .floating {
+      animation: float 6s ease-in-out infinite;
+  }
+  .scanlines {
+      background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.2) 50%,
+          rgba(0,0,0,0.2)
+      );
+      background-size: 100% 4px;
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      pointer-events: none;
+      z-index: 10;
+  }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
