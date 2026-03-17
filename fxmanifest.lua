@@ -11,7 +11,6 @@ loadscreen_manual_shutdown 'no'
 
 shared_script 'config/config.lua'
 server_script 'server.lua'
-client_script 'client.lua'
 
 files {
 	'html/**',
