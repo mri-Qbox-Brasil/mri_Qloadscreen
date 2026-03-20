@@ -299,23 +299,30 @@ function App() {
     setVolume(percent);
   };
 
+  const getAssetPath = (src, type) => {
+    if (!src) return '';
+    if (src.startsWith('http')) return src;
+    
+    // FiveM environment resolution
+    if (window.invokeNative) {
+      if (type === 'video') return `../config/video/${src}`;
+      if (type === 'audio') return `../config/audio/${src}`;
+      if (type === 'logo') return `../config/logo/${src}`;
+    }
+    
+    // Browser fallback
+    if (type === 'video') return `/config/video/${src}`;
+    if (type === 'audio') return `/config/audio/${src}`;
+    if (type === 'logo') return `/config/logo/${src}`;
+    
+    return src;
+  };
+
   const handleNextTrack = () => {
     if (config.Backgrounds && config.Backgrounds.length > 1) {
-      let nextTrackIdx = (currentTrackIndex + 1) % config.Backgrounds.length;
-      
-      // Keep searching until we find a track with valid audio or we loop back around
-      let safetyCounter = 0;
-      while ((!config.Backgrounds[nextTrackIdx].audioLink || config.Backgrounds[nextTrackIdx].audioLink === '') && safetyCounter < config.Backgrounds.length) {
-         nextTrackIdx = (nextTrackIdx + 1) % config.Backgrounds.length;
-         safetyCounter++;
-      }
-      
-      setCurrentTrackIndex(nextTrackIdx);
-      
-      // Update background video only if the new track specifies a different file
-      if (config.Backgrounds[nextTrackIdx].file && config.Backgrounds[nextTrackIdx].file !== '') {
-         setCurrentVideoIndex(nextTrackIdx);
-      }
+      const nextIdx = (currentTrackIndex + 1) % config.Backgrounds.length;
+      setCurrentTrackIndex(nextIdx);
+      setCurrentVideoIndex(nextIdx); // Keep them synced as requested
     } else if (config.Backgrounds && config.Backgrounds.length === 1) {
       // Loop a single track
       if (audioRef.current) {
@@ -327,31 +334,9 @@ function App() {
 
   const handlePrevTrack = () => {
     if (config.Backgrounds && config.Backgrounds.length > 1) {
-      let prevTrackIdx = (currentTrackIndex - 1 + config.Backgrounds.length) % config.Backgrounds.length;
-
-      // Keep searching backwards until we find a track with valid audio
-      let safetyCounter = 0;
-      while ((!config.Backgrounds[prevTrackIdx].audioLink || config.Backgrounds[prevTrackIdx].audioLink === '') && safetyCounter < config.Backgrounds.length) {
-         prevTrackIdx = (prevTrackIdx - 1 + config.Backgrounds.length) % config.Backgrounds.length;
-         safetyCounter++;
-      }
-
-      setCurrentTrackIndex(prevTrackIdx);
-      
-      // Look back to find nearest active video background leading up to this track
-      for(let i = prevTrackIdx; i >= 0; i--) {
-        if (config.Backgrounds[i].file && config.Backgrounds[i].file !== '') {
-          setCurrentVideoIndex(i);
-          return;
-        }
-      }
-      // If we didn't find one looping backwards from prevTrackIdx to 0, loop from the end
-      for(let i = config.Backgrounds.length - 1; i > prevTrackIdx; i--) {
-        if (config.Backgrounds[i].file && config.Backgrounds[i].file !== '') {
-          setCurrentVideoIndex(i);
-          return;
-        }
-      }
+      const prevIdx = (currentTrackIndex - 1 + config.Backgrounds.length) % config.Backgrounds.length;
+      setCurrentTrackIndex(prevIdx);
+      setCurrentVideoIndex(prevIdx); // Keep them synced
     } else if (config.Backgrounds && config.Backgrounds.length === 1) {
       // Loop a single track
       if (audioRef.current) {
@@ -385,20 +370,18 @@ function App() {
     <div className="bg-background-dark text-white font-body italic h-screen w-screen overflow-hidden relative selection:bg-primary selection:text-white">
       <div className="absolute inset-0 z-0">
         {(config.videourl || config.videofolder) && currentVideo && currentVideo.file && (
-          <video
-            key={currentVideo.file} // Force React to remount video when source changes
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
+            <video
+              key={currentVideo.file} // Force React to remount video when source changes
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              className="w-full h-full object-cover"
+            >
             <source 
-              src={
-                config.videourl 
-                  ? currentVideo.file
-                  : (window.invokeNative ? `../config/video/${currentVideo.file}` : `/config/video/${currentVideo.file}`)
-              } 
+              src={getAssetPath(currentVideo.file, 'video')} 
               type="video/mp4" 
             />
             Seu navegador não suporta vídeos.
@@ -429,11 +412,7 @@ function App() {
             onLoadedMetadata={handleTimeUpdate}
           >
              <source 
-              src={
-                config.musicurl 
-                  ? currentTrack.audioLink
-                  : (window.invokeNative ? `../config/audio/${currentTrack.audioLink}` : `/config/audio/${currentTrack.audioLink}`)
-              } 
+              src={getAssetPath(currentTrack.audioLink, 'audio')} 
               type="audio/mpeg" 
             />
           </audio>
@@ -450,7 +429,7 @@ function App() {
             <div className="mb-2 w-full flex justify-start">
                 {config.ThemeConfig.Logo && config.ThemeConfig.Logo.file && (
                   <img 
-                    src={window.invokeNative ? `../config/logo/${config.ThemeConfig.Logo.file}` : `/config/logo/${config.ThemeConfig.Logo.file}`} 
+                    src={getAssetPath(config.ThemeConfig.Logo.file, 'logo')} 
                     alt="" 
                     className="object-contain"
                     style={{ 

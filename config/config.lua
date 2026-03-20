@@ -4,20 +4,26 @@ Config.UseOverlayEffect = false -- Use overlay effect on the loading screen.
 Config.DiscordUrl = 'https://discord.gg/j52S7kEAcZ' -- Discord URL.
 
 -- Video Configuration
-Config.videourl = false      -- If true, plays video from an external link (Config.Backgrounds.file must be a link)
-Config.videofolder = true   -- If true, plays video from config/video/ folder
+Config.videourl = true      -- If true, plays video from an external link (Config.Backgrounds.file must be a link)
+Config.videofolder = true  -- If true, plays video from config/video/ folder
 
 -- Music Configuration
 Config.musicurl = true      -- If true, plays music from an external link (Config.Backgrounds.audioLink must be a link)
-Config.musicfolder = false   -- If true, plays music from config/audio/ folder (you must create this folder and configure the audio file)
+Config.musicfolder = true   -- If true, plays music from config/audio/ folder (you must create this folder and configure the audio file)
 
 Config.Backgrounds = {
-    -- {
-    --     file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/Fly.mp4',
-    --     musicName = 'FLY',
-    --     musicAuthor = 'FLYTUE',
-    --     audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/Matu-MEUCEMITRIO-30PRAUM(youtube).mp3',
-    -- },
+    {
+        file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp4',
+        musicName = 'GTA6',
+        musicAuthor = 'Rockstar Games',
+        audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp3',
+    },
+    {
+        file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bemvindoa.mp4',
+        musicName = 'MriQbox',
+        musicAuthor = 'mriqbox',
+        audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bem-vindoamriqbox.mp3',
+    },
     {
         file = 'video.mp4',
         musicName = 'FE!N',
