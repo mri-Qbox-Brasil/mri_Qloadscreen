@@ -295,12 +295,22 @@ function App() {
   };
 
   const handleSeek = (e) => {
+    // Bloqueia avanço se estiver usando som do vídeo, conforme pedido
+    if (currentTrack?.useVideoAudio) return;
+
     const bounds = e.currentTarget.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (e.clientX - bounds.left) / bounds.width));
     const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
     if (activeAudioSource && duration > 0) {
       activeAudioSource.currentTime = percent * duration;
     }
+  };
+
+  const formatTime = (seconds) => {
+    if (isNaN(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleVolumeDrag = (e) => {
@@ -558,28 +568,40 @@ function App() {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-md">
-              <div className="w-8 h-8 rounded bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center" style={{ backgroundColor: config.ThemeConfig.primaryColor }}>
-                <span className="material-icons text-white text-sm">music_note</span>
+            <div className="flex flex-col gap-1 bg-black/40 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-md min-w-[200px] md:min-w-[300px]">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shrink-0" style={{ backgroundColor: config.ThemeConfig.primaryColor }}>
+                  <span className="material-icons text-white text-sm">{currentTrack?.useVideoAudio ? 'videocam' : 'music_note'}</span>
+                </div>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-xs font-bold text-white tracking-wide truncate">{currentTrack ? currentTrack.musicName : 'Música'}</span>
+                  <span className="text-[10px] text-gray-400 uppercase tracking-widest truncate">{currentTrack ? currentTrack.musicAuthor : 'Artista'}</span>
+                </div>
+                {!currentTrack?.useVideoAudio && (
+                   <div className="ml-auto flex items-center gap-1 text-[10px] font-mono text-gray-500 shrink-0">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>/</span>
+                      <span>{formatTime(duration)}</span>
+                   </div>
+                )}
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-white tracking-wide">{currentTrack ? currentTrack.musicName : 'Música'}</span>
-                <span className="text-[10px] text-gray-400 uppercase tracking-widest">{currentTrack ? currentTrack.musicAuthor : 'Artista'}</span>
-              </div>
+              
               <div 
-                className="w-24 h-1.5 bg-gray-700/50 rounded-full ml-2 relative cursor-pointer group"
-                onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); handleSeek(e); }}
-                onPointerMove={(e) => { if (e.buttons === 1) handleSeek(e); }}
-                onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
+                className={`h-1.5 bg-gray-700/50 rounded-full relative mt-1 ${currentTrack?.useVideoAudio ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer group'}`}
+                onPointerDown={(e) => { if (!currentTrack?.useVideoAudio) { e.currentTarget.setPointerCapture(e.pointerId); handleSeek(e); } }}
+                onPointerMove={(e) => { if (!currentTrack?.useVideoAudio && e.buttons === 1) handleSeek(e); }}
+                onPointerUp={(e) => { if (!currentTrack?.useVideoAudio) e.currentTarget.releasePointerCapture(e.pointerId); }}
               >
                 <div 
                   className="absolute left-0 top-0 h-full rounded-full shadow-lg transition-all" 
                   style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`, backgroundColor: config.ThemeConfig.primaryColor, boxShadow: `0 0 10px ${config.ThemeConfig.primaryColor}` }}
                 ></div>
-                <div 
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" 
-                  style={{ left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 4px)`, backgroundColor: '#fff' }}
-                ></div>
+                {!currentTrack?.useVideoAudio && (
+                  <div 
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" 
+                    style={{ left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 4px)`, backgroundColor: '#fff' }}
+                  ></div>
+                )}
               </div>
             </div>
           </div>
