@@ -373,11 +373,27 @@ function App() {
 
   // Restart play state when track changes
   useEffect(() => {
-    const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
+    const isUsingVideoAudio = currentTrack?.useVideoAudio;
+    const activeAudioSource = isUsingVideoAudio ? videoRef.current : audioRef.current;
+    
     if (activeAudioSource && isPlaying) {
-      activeAudioSource.play().catch(e => console.log('Auto-play prevented:', e));
+      const playPromise = activeAudioSource.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.warn("[mri_Qloadscreen] Auto-play bloqueado pelo navegador. Tentando com mute e depois desmutando...");
+          if (isUsingVideoAudio && videoRef.current) {
+             videoRef.current.muted = true;
+             videoRef.current.play().then(() => {
+                // Tenta desmutar após iniciar o play
+                setTimeout(() => {
+                   if (videoRef.current) videoRef.current.muted = false;
+                }, 1000);
+             });
+          }
+        });
+      }
     }
-  }, [currentTrackIndex]);
+  }, [currentTrackIndex, isPlaying]);
 
   const currentTrack = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentTrackIndex] : null;
   const currentVideo = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentVideoIndex] : null;
