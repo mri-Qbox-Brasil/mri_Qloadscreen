@@ -11,6 +11,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [showHUD, setShowHUD] = useState(true);
 
   const [config, setConfig] = useState({
     UseOverlayEffect: false,
@@ -213,6 +214,12 @@ function App() {
            // We only want the progress bar to go UP, never backwards
            return loadProgress > prev ? loadProgress : prev;
         });
+      } else if (data.eventName === 'closeLoadingScreen') {
+        // Sinal enviado pelo client.lua quando o jogo está pronto
+        console.log("[mri_Qloadscreen] Fechando tela de carregamento via sinal do client.lua");
+        if (window.invokeNative) {
+           window.invokeNative('quit', '');
+        }
       }
     };
 
@@ -408,6 +415,30 @@ function App() {
   const currentTrack = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentTrackIndex] : null;
   const currentVideo = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentVideoIndex] : null;
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      
+      if (key === 'o') {
+        setShowHUD(prev => !prev);
+      } else if (key === 'p') {
+        togglePlay();
+      } else if (e.key === 'ArrowUp') {
+        setVolume(prev => Math.min(1, prev + 0.05));
+      } else if (e.key === 'ArrowDown') {
+        setVolume(prev => Math.max(0, prev - 0.05));
+      } else if (e.key === 'ArrowRight') {
+        handleNextTrack();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevTrack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentTrack, isPlaying, volume, config.Backgrounds, currentTrackIndex]);
+
   return (
     <div className="bg-background-dark text-white font-body italic h-screen w-screen overflow-hidden relative selection:bg-primary selection:text-white">
       <div className="absolute inset-0 z-0">
@@ -466,8 +497,8 @@ function App() {
           <div className="absolute inset-0 bg-black opacity-40"></div>
         )}
       </div>
-      <div className="relative z-20 h-full flex flex-col justify-between p-8 md:p-12">
-        <div className="flex flex-col md:flex-row justify-between items-start w-full relative z-30 pointer-events-auto gap-4">
+      <div className={`relative z-20 h-full flex flex-col justify-between p-8 md:p-12 transition-all duration-700 ${showHUD ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`flex flex-col md:flex-row justify-between items-start w-full relative z-30 pointer-events-auto gap-4 ${showHUD ? '' : 'pointer-events-none'}`}>
           
           {/* Left Block: Logo, Welcome Title, and Text */}
           <div className="w-full md:w-1/3 flex flex-col items-start text-left shrink-0">
@@ -605,7 +636,7 @@ function App() {
 
         {/* Empty Space Filler */}
         <div className="flex-grow"></div>
-        <div className="w-full relative z-30 mt-auto">
+        <div className={`w-full relative z-30 mt-auto transition-all ${showHUD ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="flex justify-between items-end mb-2 relative">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-1">

@@ -7,10 +7,11 @@ version '2.0.0'
 
 loadscreen 'html/index.html'
 loadscreen_cursor 'yes'
-loadscreen_manual_shutdown 'no'
+loadscreen_manual_shutdown 'yes'
 
 shared_script 'config/config.lua'
 server_script 'server.lua'
+client_script 'client.lua'
 
 files {
 	'html/**',

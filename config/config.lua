@@ -12,6 +12,8 @@ Config.musicurl = true      -- If true, plays music from an external link (Confi
 Config.musicfolder = true   -- If true, plays music from config/audio/ folder (you must create this folder and configure the audio file)
 
 Config.Backgrounds = {
+
+    ---MODELO VIA URL---
     {
         file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp4',
         useVideoAudio = true, -- Toca o som do próprio vídeo
@@ -19,6 +21,7 @@ Config.Backgrounds = {
         musicAuthor = 'Rockstar Games',
         audioLink = '',
     },
+    ---MODELO VIA URL---
     {
         file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bemvindoa.mp4',
         useVideoAudio = true, -- Toca o som do próprio vídeo
@@ -26,13 +29,14 @@ Config.Backgrounds = {
         musicAuthor = 'mriqbox',
         audioLink = '',
     },
-    {
-        file = 'video.mp4',
-        useVideoAudio = false, -- Usa o link de áudio abaixo (FE!N)
-        musicName = 'FE!N',
-        musicAuthor = 'Travis Scott',
-        audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',
-    }
+    ---MODELO VIA PASTA---
+    -- {
+    --     file = 'video.mp4',
+    --     useVideoAudio = false, -- Usa o link de áudio abaixo (FE!N)
+    --     musicName = 'FE!N',
+    --     musicAuthor = 'Travis Scott',
+    --     audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',
+    -- }
 }
 
 Config.Texts = {

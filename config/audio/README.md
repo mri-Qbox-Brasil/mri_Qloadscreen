@@ -1,12 +1,9 @@
-# Pt-br
+# Pt-br / En
 # ----------
-# Esta pasta serve para armazenar o vídeo da sua tela de carregamento.
-# Por favor, coloque um arquivo de vídeo chamado "audio.mp3" aqui.
-# configure em config/config.lua
-# file = 'meuvideo.mp4',  -- Coloque o NOME exato do vídeo que já está na pasta config/video/
-# musicName = 'Nome da Música',
-# musicAuthor = 'Nome do Artista',
-# audioLink = 'minhamusica.mp3', -- Coloque o NOME exato da música na pasta config/audio/
+# Esta pasta serve para armazenar suas músicas locais.
+# Coloque seus arquivos .mp3 aqui e configure no config.lua:
+# audioLink = 'minhamusica.mp3', -- Nome exato do arquivo
+# useVideoAudio = false,         -- Use false para permitir que a música toque
 
 # En
 # -------------
