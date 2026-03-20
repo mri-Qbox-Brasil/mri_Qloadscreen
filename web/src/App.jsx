@@ -577,13 +577,9 @@ function App() {
                   <span className="text-xs font-bold text-white tracking-wide truncate">{currentTrack ? currentTrack.musicName : 'Música'}</span>
                   <span className="text-[10px] text-gray-400 uppercase tracking-widest truncate">{currentTrack ? currentTrack.musicAuthor : 'Artista'}</span>
                 </div>
-                {!currentTrack?.useVideoAudio && (
-                   <div className="ml-auto flex items-center gap-1 text-[10px] font-mono text-gray-500 shrink-0">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>/</span>
-                      <span>{formatTime(duration)}</span>
-                   </div>
-                )}
+                <div className="ml-auto flex items-center gap-1 text-[10px] font-mono shrink-0" style={{ color: config.ThemeConfig.primaryColor }}>
+                   <span>{formatTime(currentTime)}</span>
+                </div>
               </div>
               
               <div 
