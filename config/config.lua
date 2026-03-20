@@ -14,18 +14,21 @@ Config.musicfolder = true   -- If true, plays music from config/audio/ folder (y
 Config.Backgrounds = {
     {
         file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp4',
+        useVideoAudio = true, -- Toca o som do próprio vídeo
         musicName = 'GTA6',
         musicAuthor = 'Rockstar Games',
-        audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp3',
+        audioLink = '',
     },
     {
         file = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bemvindoa.mp4',
+        useVideoAudio = true, -- Toca o som do próprio vídeo
         musicName = 'MriQbox',
         musicAuthor = 'mriqbox',
-        audioLink = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bem-vindoamriqbox.mp3',
+        audioLink = '',
     },
     {
         file = 'video.mp4',
+        useVideoAudio = false, -- Usa o link de áudio abaixo (FE!N)
         musicName = 'FE!N',
         musicAuthor = 'Travis Scott',
         audioLink = 'https://r2.fivemanage.com/ilww0vsQbrOTUyk9NfMQN/2.mp3',

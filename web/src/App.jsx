@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 function App() {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
+  const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.5);
   const [showVolume, setShowVolume] = useState(false);
@@ -186,6 +187,9 @@ function App() {
              const musicAuthorMatch = block.match(/musicAuthor\s*=\s*(["'])(.*?)\1/);
              if (musicAuthorMatch) bgItem.musicAuthor = musicAuthorMatch[2];
              
+             const useVideoAudioMatch = block.match(/useVideoAudio\s*=\s*(true|false)/);
+             if (useVideoAudioMatch) bgItem.useVideoAudio = useVideoAudioMatch[1] === 'true';
+             
              newCfg.Backgrounds.push(bgItem);
            });
         }
@@ -265,31 +269,37 @@ function App() {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+    }
   }, [volume]);
 
   const togglePlay = () => {
-    if (audioRef.current) {
+    const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
+    if (activeAudioSource) {
       if (isPlaying) {
-        audioRef.current.pause();
+        activeAudioSource.pause();
       } else {
-        audioRef.current.play();
+        activeAudioSource.play();
       }
       setIsPlaying(!isPlaying);
     }
   };
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-      setDuration(audioRef.current.duration || 0);
+    const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
+    if (activeAudioSource) {
+      setCurrentTime(activeAudioSource.currentTime);
+      setDuration(activeAudioSource.duration || 0);
     }
   };
 
   const handleSeek = (e) => {
     const bounds = e.currentTarget.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (e.clientX - bounds.left) / bounds.width));
-    if (audioRef.current && duration > 0) {
-      audioRef.current.currentTime = percent * duration;
+    const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
+    if (activeAudioSource && duration > 0) {
+      activeAudioSource.currentTime = percent * duration;
     }
   };
 
@@ -349,8 +359,13 @@ function App() {
   // Auto-play next track when current ends
   useEffect(() => {
     const audioEl = audioRef.current;
-    if (audioEl) {
-      const handleEnded = () => handleNextTrack();
+    const videoEl = videoRef.current;
+    const handleEnded = () => handleNextTrack();
+    
+    if (currentTrack?.useVideoAudio && videoEl) {
+      videoEl.addEventListener('ended', handleEnded);
+      return () => videoEl.removeEventListener('ended', handleEnded);
+    } else if (audioEl) {
       audioEl.addEventListener('ended', handleEnded);
       return () => audioEl.removeEventListener('ended', handleEnded);
     }
@@ -358,8 +373,9 @@ function App() {
 
   // Restart play state when track changes
   useEffect(() => {
-    if (audioRef.current && isPlaying) {
-      audioRef.current.play().catch(e => console.log('Auto-play prevented:', e));
+    const activeAudioSource = currentTrack?.useVideoAudio ? videoRef.current : audioRef.current;
+    if (activeAudioSource && isPlaying) {
+      activeAudioSource.play().catch(e => console.log('Auto-play prevented:', e));
     }
   }, [currentTrackIndex]);
 
@@ -372,12 +388,15 @@ function App() {
         {(config.videourl || config.videofolder) && currentVideo && currentVideo.file && (
             <video
               key={currentVideo.file} // Force React to remount video when source changes
+              ref={videoRef}
               autoPlay
-              loop
-              muted
+              loop={!currentTrack?.useVideoAudio} // Don't loop if using as audio source, handled by handleEnded
+              muted={!currentTrack?.useVideoAudio}
               playsInline
               preload="auto"
               disablePictureInPicture
+              onTimeUpdate={currentTrack?.useVideoAudio ? handleTimeUpdate : undefined}
+              onLoadedMetadata={currentTrack?.useVideoAudio ? handleTimeUpdate : undefined}
               className="w-full h-full object-cover"
             >
             <source 
@@ -402,7 +421,7 @@ function App() {
         `}} />
         
         {/* Audio Element */}
-        {(config.musicurl || config.musicfolder) && currentTrack && currentTrack.audioLink && (
+        {!currentTrack?.useVideoAudio && (config.musicurl || config.musicfolder) && currentTrack && currentTrack.audioLink && (
           <audio 
             key={currentTrack.audioLink} // Force remount to properly trigger new source
             ref={audioRef}
