@@ -14,10 +14,17 @@ server_script 'server.lua'
 client_script 'client.lua'
 
 files {
-	'html/**',
-	'config/**',
-    'config/logo/**/*.{png,jpg,jpeg}',
-    'config/staffs/**/*.{png,jpg,jpeg}',
-    'config/video/**/*.{mp4,webm}',
-    'config/audio/**/*.{mp3,ogg}',
+	'html/index.html',
+    'html/assets/*',
+    'config/config.lua',
+    'config/logo/*.png',
+    'config/logo/*.jpg',
+    'config/logo/*.jpeg',
+    'config/staffs/*.png',
+    'config/staffs/*.jpg',
+    'config/staffs/*.jpeg',
+    'config/video/*.mp4',
+    'config/video/*.webm',
+    'config/audio/*.mp3',
+    'config/audio/*.ogg',
 }

@@ -574,26 +574,28 @@ function App() {
                 </span>
                 <span className="text-sm font-semibold tracking-wide">{config.Texts.online}</span>
               </div>
-             </div>
-           </div>
+            </div>
+
+            {/* Staff Carousel (Now in the left column) */}
+            {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
+              <div className="mt-8 flex items-center gap-4 bg-black/20 backdrop-blur-sm p-3 rounded-xl border border-white/5 w-fit">
+                <div className="relative w-16 h-16 rounded-full border-2 border-primary overflow-hidden shadow-lg" style={{ borderColor: config.ThemeConfig.primaryColor }}>
+                  <img 
+                    key={currentStaffIndex}
+                    src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')} 
+                    alt="" 
+                    className="w-full h-full object-cover animate-fade-in"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[8px] text-primary font-bold uppercase tracking-widest leading-none mb-1" style={{ color: config.ThemeConfig.primaryColor }}>Equipe Staff</span>
+                  <span key={`name-${currentStaffIndex}`} className="text-sm font-display font-medium text-white italic animate-fade-in whitespace-nowrap">{config.StaffList[currentStaffIndex].staff}</span>
+                </div>
+              </div>
+            )}
+          </div>
            
-           {/* Center or Right Block: Staff Carousel */}
-           {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
-             <div className="hidden md:flex flex-col items-center justify-center gap-2 self-center bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/5 transition-all duration-1000">
-               <div className="relative w-24 h-24 rounded-full border-2 border-primary overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.1)]" style={{ borderColor: config.ThemeConfig.primaryColor }}>
-                 <img 
-                   key={currentStaffIndex} // Key forces animation/re-render on change
-                   src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')} 
-                   alt="" 
-                   className="w-full h-full object-cover animate-fade-in"
-                 />
-               </div>
-               <div className="flex flex-col items-center">
-                 <span className="text-[10px] text-primary font-bold uppercase tracking-widest" style={{ color: config.ThemeConfig.primaryColor }}>Staff Members</span>
-                 <span key={`name-${currentStaffIndex}`} className="text-sm font-display font-medium text-white italic animate-fade-in">{config.StaffList[currentStaffIndex].staff}</span>
-               </div>
-             </div>
-           )}
+            {/* Staff Carousel removed from here */}
  
            {/* Right Block: Audio Controls */}
           <div className="flex items-center justify-end gap-4 shrink-0 mt-4 md:mt-0 z-30">
@@ -697,12 +699,27 @@ function App() {
               <div className="text-xs text-gray-400 font-mono">{config.Texts.gameloading}</div>
             </div>
             {/* Hotkey Hints above percentage */}
-            <div className="absolute right-0 bottom-full mb-1 flex flex-col items-end gap-1 opacity-60 text-[10px] uppercase tracking-tighter transition-all hover:opacity-100">
-               <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5 backdrop-blur-sm">
-                  <span className="text-white">O</span> <span className="text-gray-400">HUD</span>
-                  <span className="text-white ml-2">P</span> <span className="text-gray-400">PLAY</span>
-                  <span className="text-white ml-2">↑↓</span> <span className="text-gray-400">VOL</span>
-                  <span className="text-white ml-2">←→</span> <span className="text-gray-400">TRACK</span>
+            <div className="absolute right-0 bottom-full mb-2 flex flex-col items-end gap-1.5 transition-all duration-300 opacity-60 hover:opacity-100">
+               <div className="flex flex-col md:flex-row items-end md:items-center gap-3 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 backdrop-blur-md shadow-2xl">
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-center justify-center w-5 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[10px]">O</span>
+                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">ESCONDER HUD</span>
+                  </div>
+                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-center justify-center w-5 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[10px]">P</span>
+                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">PAUSE / PLAY</span>
+                  </div>
+                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-center justify-center w-7 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[12px] leading-none">↑↓</span>
+                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">VOLUME</span>
+                  </div>
+                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-center justify-center w-7 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[12px] leading-none">←→</span>
+                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">ANTERIOR / PRÓXIMO</span>
+                  </div>
                </div>
             </div>
 
