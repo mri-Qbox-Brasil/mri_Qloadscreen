@@ -16,7 +16,8 @@ client_script 'client.lua'
 files {
 	'html/**',
 	'config/**',
-    'config/logo/**/*.png',
-    'config/video/**/*.mp4',
-    'config/audio/**/*.mp3',
+    'config/logo/**/*.{png,jpg,jpeg}',
+    'config/staffs/**/*.{png,jpg,jpeg}',
+    'config/video/**/*.{mp4,webm}',
+    'config/audio/**/*.{mp3,ogg}',
 }

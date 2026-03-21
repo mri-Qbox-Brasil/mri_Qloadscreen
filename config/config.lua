@@ -1,7 +1,21 @@
 Config = {}
 
-Config.UseOverlayEffect = false -- Use overlay effect on the loading screen.
-Config.DiscordUrl = 'https://discord.gg/j52S7kEAcZ' -- Discord URL.
+Config.UseOverlayEffect = true -- Se deve usar um efeito de overlay escuro no fundo (ajuda a ler textos)
+Config.DiscordUrl = 'https://discord.gg/mriqbox' -- Discord URL.
+
+-- Configuração da Staff
+Config.ShowStaff = true -- Ativar carrossel da staff
+Config.StaffList = {
+    { image = 'murai.png', staff = 'MURAI' },
+    { image = 'g5.jpeg', staff = 'G5' },
+    { image = 'snow.png', staff = 'SNOW' },
+    { image = 'gh.jpeg', staff = 'GH' },
+    { image = 'gordela.png', staff = 'GORDELA' },
+    { image = 'jj.png', staff = 'JJ' },
+    { image = 'xstells.png', staff = 'XSTELLS' },
+    { image = 'subzero.png', staff = 'SUBZERO' },
+    { image = 'spacer.jpeg', staff = 'SPACER' },
+}
 
 -- Video Configuration
 Config.videourl = true      -- If true, plays video from an external link (Config.Backgrounds.file must be a link)

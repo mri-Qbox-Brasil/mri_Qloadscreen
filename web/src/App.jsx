@@ -12,6 +12,7 @@ function App() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [showHUD, setShowHUD] = useState(true);
+  const [currentStaffIndex, setCurrentStaffIndex] = useState(0);
 
   const [config, setConfig] = useState({
     UseOverlayEffect: false,
@@ -40,7 +41,9 @@ function App() {
       primaryColor: '#5CE65C',
       primaryBase: '#5CE65C',
       Logo: { file: 'logo.png', width: 80, height: -1 }
-    }
+    },
+    ShowStaff: false,
+    StaffList: []
   });
 
   const formatConfigColors = (cfg) => {
@@ -164,10 +167,28 @@ function App() {
         const musicUrlMatch = luaContent.match(/Config\.musicurl\s*=\s*(true|false)/);
         if (musicUrlMatch) newCfg.musicurl = musicUrlMatch[1] === 'true';
 
-        const musicFolderMatch = luaContent.match(/Config\.musicfolder\s*=\s*(true|false)/);
-        if (musicFolderMatch) newCfg.musicfolder = musicFolderMatch[1] === 'true';
-
-        const bgArrayMatch = luaContent.match(/Config\.Backgrounds\s*=\s*{([\s\S]*?)}\s*(\n\n|$|Config)/);
+         const musicFolderMatch = luaContent.match(/Config\.musicfolder\s*=\s*(true|false)/);
+         if (musicFolderMatch) newCfg.musicfolder = musicFolderMatch[1] === 'true';
+ 
+         const showStaffMatch = luaContent.match(/Config\.ShowStaff\s*=\s*(true|false)/);
+         if (showStaffMatch) newCfg.ShowStaff = showStaffMatch[1] === 'true';
+ 
+         const staffArrayMatch = luaContent.match(/Config\.StaffList\s*=\s*{([\s\S]*?)}\s*(\n\n|$|Config)/);
+         if (staffArrayMatch) {
+            const staffContent = staffArrayMatch[1];
+            const blocks = [...staffContent.matchAll(/{([^}]*)}/g)];
+            blocks.forEach(blockMatch => {
+              const block = blockMatch[1];
+              const staffItem = { image: '', staff: '' };
+              const imgMatch = block.match(/image\s*=\s*(["'])(.*?)\1/);
+              if (imgMatch) staffItem.image = imgMatch[2];
+              const nameMatch = block.match(/staff\s*=\s*(["'])(.*?)\1/);
+              if (nameMatch) staffItem.staff = nameMatch[2];
+              newCfg.StaffList.push(staffItem);
+            });
+         }
+ 
+         const bgArrayMatch = luaContent.match(/Config\.Backgrounds\s*=\s*{([\s\S]*?)}\s*(\n\n|$|Config)/);
         if (bgArrayMatch) {
            const bgContent = bgArrayMatch[1];
            const blocks = [...bgContent.matchAll(/{([^}]*)}/g)];
@@ -333,17 +354,19 @@ function App() {
     // FiveM environment resolution
     if (window.invokeNative) {
       if (type === 'video') return `../config/video/${src}`;
-      if (type === 'audio') return `../config/audio/${src}`;
-      if (type === 'logo') return `../config/logo/${src}`;
-    }
+       if (type === 'audio') return `../config/audio/${src}`;
+       if (type === 'logo') return `../config/logo/${src}`;
+       if (type === 'staff') return `../config/staffs/${src}`;
+     }
     
     // Browser fallback
     if (type === 'video') return `/config/video/${src}`;
-    if (type === 'audio') return `/config/audio/${src}`;
-    if (type === 'logo') return `/config/logo/${src}`;
-    
-    return src;
-  };
+     if (type === 'audio') return `/config/audio/${src}`;
+     if (type === 'logo') return `/config/logo/${src}`;
+     if (type === 'staff') return `/config/staffs/${src}`;
+     
+     return src;
+   };
 
   const handleNextTrack = () => {
     if (config.Backgrounds && config.Backgrounds.length > 1) {
@@ -411,7 +434,17 @@ function App() {
       }
     }
   }, [currentTrackIndex, isPlaying]);
-
+ 
+  // Staff Carousel Logic
+  useEffect(() => {
+    if (config.ShowStaff && config.StaffList && config.StaffList.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentStaffIndex(prev => (prev + 1) % config.StaffList.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [config.ShowStaff, config.StaffList]);
+ 
   const currentTrack = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentTrackIndex] : null;
   const currentVideo = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentVideoIndex] : null;
 
@@ -541,10 +574,28 @@ function App() {
                 </span>
                 <span className="text-sm font-semibold tracking-wide">{config.Texts.online}</span>
               </div>
-            </div>
-          </div>
-          
-          {/* Right Block: Audio Controls */}
+             </div>
+           </div>
+           
+           {/* Center or Right Block: Staff Carousel */}
+           {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
+             <div className="hidden md:flex flex-col items-center justify-center gap-2 self-center bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/5 transition-all duration-1000">
+               <div className="relative w-24 h-24 rounded-full border-2 border-primary overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.1)]" style={{ borderColor: config.ThemeConfig.primaryColor }}>
+                 <img 
+                   key={currentStaffIndex} // Key forces animation/re-render on change
+                   src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')} 
+                   alt="" 
+                   className="w-full h-full object-cover animate-fade-in"
+                 />
+               </div>
+               <div className="flex flex-col items-center">
+                 <span className="text-[10px] text-primary font-bold uppercase tracking-widest" style={{ color: config.ThemeConfig.primaryColor }}>Staff Members</span>
+                 <span key={`name-${currentStaffIndex}`} className="text-sm font-display font-medium text-white italic animate-fade-in">{config.StaffList[currentStaffIndex].staff}</span>
+               </div>
+             </div>
+           )}
+ 
+           {/* Right Block: Audio Controls */}
           <div className="flex items-center justify-end gap-4 shrink-0 mt-4 md:mt-0 z-30">
             <div className="flex gap-2 relative">
               <button 
@@ -645,6 +696,16 @@ function App() {
               </div>
               <div className="text-xs text-gray-400 font-mono">{config.Texts.gameloading}</div>
             </div>
+            {/* Hotkey Hints above percentage */}
+            <div className="absolute right-0 bottom-full mb-1 flex flex-col items-end gap-1 opacity-60 text-[10px] uppercase tracking-tighter transition-all hover:opacity-100">
+               <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5 backdrop-blur-sm">
+                  <span className="text-white">O</span> <span className="text-gray-400">HUD</span>
+                  <span className="text-white ml-2">P</span> <span className="text-gray-400">PLAY</span>
+                  <span className="text-white ml-2">↑↓</span> <span className="text-gray-400">VOL</span>
+                  <span className="text-white ml-2">←→</span> <span className="text-gray-400">TRACK</span>
+               </div>
+            </div>
+
             {/* Percentage text above the right side of the bar */}
             <div className="absolute right-2 bottom-0 font-mono font-bold text-xl leading-none translate-y-[6px]" style={{ color: config.ThemeConfig.primaryColor }}>
               {progress}%
