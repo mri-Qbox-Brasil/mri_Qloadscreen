@@ -576,26 +576,26 @@ function App() {
               </div>
             </div>
 
-            {/* Staff Carousel (Now in the left column) */}
+            {/* Staff Carousel (Now in the left column - the "Yellow Square") */}
             {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
-              <div className="mt-8 flex items-center gap-4 bg-black/20 backdrop-blur-sm p-3 rounded-xl border border-white/5 w-fit">
-                <div className="relative w-16 h-16 rounded-full border-2 border-primary overflow-hidden shadow-lg" style={{ borderColor: config.ThemeConfig.primaryColor }}>
+              <div className="mt-8 flex items-center gap-4 bg-black/20 backdrop-blur-sm p-4 rounded-2xl border border-white/5 w-fit shadow-2xl transition-all duration-500">
+                <div className="relative w-20 h-20 rounded-full border-[3px] border-primary overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]" style={{ borderColor: config.ThemeConfig.primaryColor }}>
                   <img 
                     key={currentStaffIndex}
                     src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')} 
                     alt="" 
                     className="w-full h-full object-cover animate-fade-in"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[8px] text-primary font-bold uppercase tracking-widest leading-none mb-1" style={{ color: config.ThemeConfig.primaryColor }}>Equipe Staff</span>
-                  <span key={`name-${currentStaffIndex}`} className="text-sm font-display font-medium text-white italic animate-fade-in whitespace-nowrap">{config.StaffList[currentStaffIndex].staff}</span>
+                  <span className="text-[10px] text-primary font-black uppercase tracking-[0.2em] leading-none mb-2" style={{ color: config.ThemeConfig.primaryColor }}>Membro da Staff</span>
+                  <div className="h-px w-8 bg-primary/30 mb-2" style={{ backgroundColor: `${config.ThemeConfig.primaryColor}4d` }}></div>
+                  <span key={`name-${currentStaffIndex}`} className="text-xl font-display font-black text-white italic animate-fade-in whitespace-nowrap tracking-tight">{config.StaffList[currentStaffIndex].staff}</span>
                 </div>
               </div>
             )}
           </div>
-           
-            {/* Staff Carousel removed from here */}
  
            {/* Right Block: Audio Controls */}
           <div className="flex items-center justify-end gap-4 shrink-0 mt-4 md:mt-0 z-30">
@@ -698,27 +698,27 @@ function App() {
               </div>
               <div className="text-xs text-gray-400 font-mono">{config.Texts.gameloading}</div>
             </div>
-            {/* Hotkey Hints above percentage */}
-            <div className="absolute right-0 bottom-full mb-2 flex flex-col items-end gap-1.5 transition-all duration-300 opacity-60 hover:opacity-100">
-               <div className="flex flex-col md:flex-row items-end md:items-center gap-3 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 backdrop-blur-md shadow-2xl">
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex items-center justify-center w-5 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[10px]">O</span>
-                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">ESCONDER HUD</span>
+            {/* Hotkey Hints NUI Visual Improvement */}
+            <div className="absolute right-0 bottom-full mb-3 flex flex-col items-end gap-2 transition-all duration-300 opacity-70 hover:opacity-100 group">
+               <div className="flex flex-col md:flex-row items-end md:items-center gap-4 bg-black/60 px-4 py-2 rounded-xl border border-white/10 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center min-w-[22px] h-[22px] bg-white/5 border border-white/20 border-b-[3px] rounded-md shadow-inner text-white font-black text-[11px] font-mono">O</span>
+                    <span className="text-white/40 text-[9px] font-black tracking-widest uppercase">Esconder HUD</span>
                   </div>
-                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex items-center justify-center w-5 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[10px]">P</span>
-                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">PAUSE / PLAY</span>
+                  <div className="hidden md:block w-px h-4 bg-white/10"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center min-w-[22px] h-[22px] bg-white/5 border border-white/20 border-b-[3px] rounded-md shadow-inner text-white font-black text-[11px] font-mono">P</span>
+                    <span className="text-white/40 text-[9px] font-black tracking-widest uppercase">Pause / Play</span>
                   </div>
-                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex items-center justify-center w-7 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[12px] leading-none">↑↓</span>
-                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">VOLUME</span>
+                  <div className="hidden md:block w-px h-4 bg-white/10"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center px-1.5 h-[22px] bg-white/5 border border-white/20 border-b-[3px] rounded-md shadow-inner text-white font-black text-[13px] font-mono leading-none">↑↓</span>
+                    <span className="text-white/40 text-[9px] font-black tracking-widest uppercase">Volume</span>
                   </div>
-                  <div className="hidden md:block w-px h-3 bg-white/10"></div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex items-center justify-center w-7 h-5 bg-white/10 border-b-2 border-white/20 rounded shadow-inner text-white font-bold text-[12px] leading-none">←→</span>
-                    <span className="text-gray-400 text-[9px] font-bold tracking-tight">ANTERIOR / PRÓXIMO</span>
+                  <div className="hidden md:block w-px h-4 bg-white/10"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center px-1.5 h-[22px] bg-white/5 border border-white/20 border-b-[3px] rounded-md shadow-inner text-white font-black text-[13px] font-mono leading-none">←→</span>
+                    <span className="text-white/40 text-[9px] font-black tracking-widest uppercase">Voltar / Próximo</span>
                   </div>
                </div>
             </div>
