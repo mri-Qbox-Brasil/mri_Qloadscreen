@@ -54,8 +54,8 @@ Config.Backgrounds = {
 }
 
 Config.Texts = {
-    header_1 = 'BEM-VINDO A MRI QBOX',
-    header_2 = 'Comunidade onde é levado a sério e suas ideias tentamos transformar em realidades!',
+    header_1 = 'BEM-VINDO A MRI',
+    header_2 = 'Comunidade BR onde o RP é levado a sério e transformamos suas ideias em realidade!',
     discord = 'Discord',
     online = 'Online',
     pleasewait = 'AGUARDE',

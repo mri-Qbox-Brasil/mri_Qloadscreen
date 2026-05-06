@@ -257,14 +257,6 @@ function App() {
           return prev + 1;
         });
       }, 100);
-    } else {
-      // Running inside FiveM: notify Lua that UI is ready
-      if (window.GetParentResourceName) {
-         fetch(`https://${window.GetParentResourceName()}/uiLoaded`, {
-            method: 'POST',
-            body: JSON.stringify({})
-         }).catch(e => console.log('uiLoaded callback error:', e));
-      }
     }
 
     return () => {
