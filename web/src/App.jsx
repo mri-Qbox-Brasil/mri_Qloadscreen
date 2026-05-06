@@ -83,10 +83,7 @@ function App() {
       try {
         // Tenta ler os dados injetados via deferrals.handover() pelo server.lua (Método Otimizado do FiveM)
         if (window.nuiHandoverData && window.nuiHandoverData.config) {
-          console.log("[mri_Qloadscreen] Configuração lida via nuiHandoverData nativo!");
-          const configData = window.nuiHandoverData.config;
-          console.log("[mri_Qloadscreen] DiscordUrl:", configData.DiscordUrl);
-          setConfig(formatConfigColors(configData));
+          setConfig(formatConfigColors(window.nuiHandoverData.config));
           return;
         }
 
