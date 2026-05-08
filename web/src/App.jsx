@@ -1,5 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+const HEX_RE = /^#[0-9a-f]{6}$/i;
+
+// Converte hex (#RRGGBB) → "H S% L%" e seta nas CSS vars do shadcn:
+// --primary, --ring, --primary-foreground, --primary-rgb. Mesmo padrão
+// do mri_Qmultichar / mri_Qspawn / mri_Qadmin.
+function applyAccentColor(hex) {
+  if (!HEX_RE.test(hex)) return;
+
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  const rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+  const max = Math.max(rNorm, gNorm, bNorm);
+  const min = Math.min(rNorm, gNorm, bNorm);
+  const l = (max + min) / 2;
+  let h = 0, s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === rNorm) h = ((gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0));
+    else if (max === gNorm) h = ((bNorm - rNorm) / d + 2);
+    else h = ((rNorm - gNorm) / d + 4);
+    h *= 60;
+  }
+
+  const tokenValue = `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  const isDark = l < 0.5;
+  const fgValue = isDark ? '210 40% 98%' : '240 10% 4%';
+
+  const root = document.documentElement;
+  root.style.setProperty('--primary', tokenValue);
+  root.style.setProperty('--primary-foreground', fgValue);
+  root.style.setProperty('--ring', tokenValue);
+  root.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+}
+
 function App() {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
@@ -38,44 +75,12 @@ function App() {
       gameloading: 'CARREGANDO A CIDADE...'
     },
     ThemeConfig: {
-      primaryColor: '#5CE65C',
-      primaryBase: '#5CE65C',
       Logo: { file: 'logo.png', width: 80, height: -1 }
     },
     ShowStaff: false,
     StaffList: []
   });
 
-  const formatConfigColors = (cfg) => {
-    const formatHex = (c) => {
-      if (!c) return c;
-      return c.startsWith('#') || c.startsWith('rgb') || c.startsWith('hsl') ? c : '#' + c;
-    };
-    const formatBase = (c) => {
-      let hex = formatHex(c);
-      return hex && hex.length === 9 && hex.startsWith('#') ? hex.substring(0, 7) : hex;
-    };
-    
-    let newCfg = JSON.parse(JSON.stringify(cfg));
-    if (newCfg.ThemeConfig) {
-      if (newCfg.ThemeConfig.primaryColor) {
-        newCfg.ThemeConfig.primaryBase = formatBase(newCfg.ThemeConfig.primaryColor);
-        newCfg.ThemeConfig.primaryColor = formatHex(newCfg.ThemeConfig.primaryColor);
-      } else {
-        newCfg.ThemeConfig.primaryColor = '#d946ef';
-        newCfg.ThemeConfig.primaryBase = '#d946ef';
-      }
-      if (newCfg.ThemeConfig.DiscordButton) {
-        if (newCfg.ThemeConfig.DiscordButton.backgroundColor) {
-           newCfg.ThemeConfig.DiscordButton.backgroundColor = formatHex(newCfg.ThemeConfig.DiscordButton.backgroundColor);
-        }
-        if (newCfg.ThemeConfig.DiscordButton.textColor) {
-           newCfg.ThemeConfig.DiscordButton.textColor = formatHex(newCfg.ThemeConfig.DiscordButton.textColor);
-        }
-      }
-    }
-    return newCfg;
-  };
   // Simulating loading progress if in browser, else use FiveM messages
   useEffect(() => {
     // 1. Inicia lendo as configurações
@@ -83,7 +88,7 @@ function App() {
       try {
         // Tenta ler os dados injetados via deferrals.handover() pelo server.lua (Método Otimizado do FiveM)
         if (window.nuiHandoverData && window.nuiHandoverData.config) {
-          setConfig(formatConfigColors(window.nuiHandoverData.config));
+          setConfig(window.nuiHandoverData.config);
           return;
         }
 
@@ -106,31 +111,22 @@ function App() {
           UseOverlayEffect: false, videourl: false, videofolder: true, musicurl: false, musicfolder: false, DiscordUrl: '',
           Backgrounds: [],
           Texts: { header_1: '', header_2: '', discord: '', online: '', pleasewait: '', gameloading: '' },
-          ThemeConfig: { primaryColor: '', DiscordButton: { backgroundColor: '', textColor: '' }, Logo: { file: 'logo.png', width: 300, height: -1 } }
+          ThemeConfig: { Logo: { file: 'logo.png', width: 300, height: -1 } }
         };
 
-        const themeMatch = luaContent.match(/Config\.ThemeConfig\s*=\s*{([\s\S]*?)}/);
-        if (themeMatch) {
-           const primaryMatch = themeMatch[1].match(/primaryColor\s*=\s*(["'])(.*?)\1/);
-           if (primaryMatch) newCfg.ThemeConfig.primaryColor = primaryMatch[2];
-           
-           const bgMatch = themeMatch[1].match(/backgroundColor\s*=\s*(["'])(.*?)\1/);
-           if (bgMatch) newCfg.ThemeConfig.DiscordButton.backgroundColor = bgMatch[2];
+        // Cor de destaque vem da convar `mri:color` (via handover). Aqui só
+        // parseamos o Logo do config.lua — cores legadas (primaryColor,
+        // DiscordButton) foram aposentadas em favor da convar global.
+        const logoThemeMatch = luaContent.match(/Logo\s*=\s*{([\s\S]*?)}/);
+        if (logoThemeMatch) {
+           const fileMatch = logoThemeMatch[1].match(/file\s*=\s*(["'])(.*?)\1/);
+           if (fileMatch) newCfg.ThemeConfig.Logo.file = fileMatch[2];
 
-           const tcMatch = themeMatch[1].match(/textColor\s*=\s*(["'])(.*?)\1/);
-           if (tcMatch) newCfg.ThemeConfig.DiscordButton.textColor = tcMatch[2];
+           const widthMatch = logoThemeMatch[1].match(/width\s*=\s*(-?\d+)/);
+           if (widthMatch) newCfg.ThemeConfig.Logo.width = parseInt(widthMatch[1]);
 
-           const logoThemeMatch = luaContent.match(/Logo\s*=\s*{([\s\S]*?)}/);
-           if (logoThemeMatch) {
-              const fileMatch = logoThemeMatch[1].match(/file\s*=\s*(["'])(.*?)\1/);
-              if (fileMatch) newCfg.ThemeConfig.Logo.file = fileMatch[2];
-              
-              const widthMatch = logoThemeMatch[1].match(/width\s*=\s*(-?\d+)/);
-              if (widthMatch) newCfg.ThemeConfig.Logo.width = parseInt(widthMatch[1]);
-              
-              const heightMatch = logoThemeMatch[1].match(/height\s*=\s*(-?\d+)/);
-              if (heightMatch) newCfg.ThemeConfig.Logo.height = parseInt(heightMatch[1]);
-           }
+           const heightMatch = logoThemeMatch[1].match(/height\s*=\s*(-?\d+)/);
+           if (heightMatch) newCfg.ThemeConfig.Logo.height = parseInt(heightMatch[1]);
         }
 
         const textMatch = luaContent.match(/Config\.Texts\s*=\s*{([\s\S]*?)}/);
@@ -214,7 +210,7 @@ function App() {
         }
         if (newCfg.Backgrounds.length === 0) newCfg.Backgrounds = [{ file: '', musicName: '', musicAuthor: '', audioLink: '' }];
 
-        setConfig(formatConfigColors(newCfg));
+        setConfig(newCfg);
       } catch (e) {
         console.error('Erro detalhado efetuando parse local da config.lua:', e);
       }
@@ -262,24 +258,13 @@ function App() {
     };
   }, []);
 
-  // Update CSS Variables when config changes
+  // Aplica a cor de destaque da suite MRI nos tokens shadcn (--primary,
+  // --ring, etc.). Fonte única: convar `mri:color` (server.lua passa via
+  // deferrals.handover). Mesmo padrão do mri_Qmultichar/mri_Qspawn/mri_Qadmin.
   useEffect(() => {
-    if (config.ThemeConfig) {
-      const root = document.documentElement;
-      if (config.ThemeConfig.primaryColor) {
-        root.style.setProperty('--color-primary', config.ThemeConfig.primaryColor);
-        // Sometimes Tailwind uses space-separated RGB, but here we'll assume we directly map it unless there's a specific Tailwind config
-      }
-      if (config.ThemeConfig.DiscordButton) {
-        if (config.ThemeConfig.DiscordButton.backgroundColor) {
-          root.style.setProperty('--color-discord-bg', config.ThemeConfig.DiscordButton.backgroundColor);
-        }
-        if (config.ThemeConfig.DiscordButton.textColor) {
-          root.style.setProperty('--color-discord-text', config.ThemeConfig.DiscordButton.textColor);
-        }
-      }
-    }
-  }, [config.ThemeConfig]);
+    const accent = window.nuiHandoverData?.accentColor;
+    applyAccentColor(HEX_RE.test(accent || '') ? accent : '#00E699');
+  }, []);
 
   // Audio Control Handlers
   useEffect(() => {
@@ -462,7 +447,7 @@ function App() {
   }, [currentTrack, isPlaying, volume, config.Backgrounds, currentTrackIndex]);
 
   return (
-    <div className="bg-background-dark text-white font-body italic h-screen w-screen overflow-hidden relative selection:bg-primary selection:text-white">
+    <div className="relative h-screen w-screen overflow-hidden bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
       <div className="absolute inset-0 z-0">
         {(config.videourl || config.videofolder) && currentVideo && currentVideo.file && (
             <video
@@ -538,8 +523,8 @@ function App() {
                   />
                 )}
             </div>
-            <h1 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-wide leading-none mb-6 text-white drop-shadow-lg" dangerouslySetInnerHTML={{ __html: config.Texts.header_1 }}></h1>
-            <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-md mb-8 font-light border-l-2 border-primary pl-4 bg-gradient-to-r from-primary/10 to-transparent py-2" style={{ borderColor: config.ThemeConfig.primaryColor, backgroundImage: `linear-gradient(to right, ${config.ThemeConfig.primaryBase}1a, transparent)` }}>
+            <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-wide leading-none mb-6 text-foreground drop-shadow-lg italic" dangerouslySetInnerHTML={{ __html: config.Texts.header_1 }}></h1>
+            <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-md mb-8 font-light border-l-2 border-primary pl-4 bg-gradient-to-r from-primary/10 to-transparent py-2">
               {config.Texts.header_2}
             </p>
             <div className="flex items-center gap-4">
@@ -552,14 +537,14 @@ function App() {
                 } else {
                   console.error("[mri_Qloadscreen] DiscordUrl está vazio!");
                 }
-              }} className="bg-primary hover:bg-secondary text-white font-bold py-2 px-6 rounded shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all hover:scale-105 flex items-center gap-2" style={{ backgroundColor: config.ThemeConfig.DiscordButton?.backgroundColor || config.ThemeConfig.primaryColor, color: config.ThemeConfig.DiscordButton?.textColor || '#ffffff', boxShadow: `0 0 15px ${config.ThemeConfig.primaryBase}80` }}>
+              }} className="bg-primary hover:bg-primary/85 text-primary-foreground font-bold py-2 px-6 rounded shadow-[0_0_15px_hsl(var(--primary)/0.5)] transition-all hover:scale-105 flex items-center gap-2">
                 <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.025-.32 13.559.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.068 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z"></path></svg>
                 {config.Texts.discord}
               </button>
-              <div className="flex items-center gap-2 px-4 py-2 bg-black/50 border border-white/10 rounded">
+              <div className="flex items-center gap-2 px-4 py-2 bg-card/60 border border-border rounded">
                 <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" style={{ backgroundColor: config.ThemeConfig.primaryColor }}></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" style={{ backgroundColor: config.ThemeConfig.primaryColor }}></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
                 </span>
                 <span className="text-sm font-semibold tracking-wide">{config.Texts.online}</span>
               </div>
@@ -567,18 +552,18 @@ function App() {
 
             {/* Staff Carousel (Now in the left column) */}
             {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
-              <div className="mt-8 flex items-center gap-4 bg-black/20 backdrop-blur-sm p-3 rounded-xl border border-white/5 w-fit">
-                <div className="relative w-16 h-16 rounded-full border-2 border-primary overflow-hidden shadow-lg" style={{ borderColor: config.ThemeConfig.primaryColor }}>
-                  <img 
+              <div className="mt-8 flex items-center gap-4 bg-card/40 backdrop-blur-sm p-3 rounded-xl border border-border w-fit">
+                <div className="relative w-16 h-16 rounded-full border-2 border-primary overflow-hidden shadow-lg shadow-[0_0_12px_hsl(var(--primary)/0.4)]">
+                  <img
                     key={currentStaffIndex}
-                    src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')} 
-                    alt="" 
+                    src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')}
+                    alt=""
                     className="w-full h-full object-cover animate-fade-in"
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[8px] text-primary font-bold uppercase tracking-widest leading-none mb-1" style={{ color: config.ThemeConfig.primaryColor }}>Equipe Staff</span>
-                  <span key={`name-${currentStaffIndex}`} className="text-sm font-display font-medium text-white italic animate-fade-in whitespace-nowrap">{config.StaffList[currentStaffIndex].staff}</span>
+                  <span className="text-[8px] text-primary font-bold uppercase tracking-widest leading-none mb-1">Equipe Staff</span>
+                  <span key={`name-${currentStaffIndex}`} className="text-sm font-medium text-foreground italic animate-fade-in whitespace-nowrap">{config.StaffList[currentStaffIndex].staff}</span>
                 </div>
               </div>
             )}
@@ -596,10 +581,9 @@ function App() {
                 <span className="material-icons text-sm">skip_previous</span>
               </button>
 
-              <button 
+              <button
                 onClick={togglePlay}
-                className="w-8 h-8 rounded bg-primary hover:bg-primary/80 flex items-center justify-center transition-colors neon-box" 
-                style={{ backgroundColor: config.ThemeConfig.primaryColor, boxShadow: `0 0 15px ${config.ThemeConfig.primaryBase}66` }}
+                className="w-8 h-8 rounded bg-primary hover:bg-primary/80 text-primary-foreground flex items-center justify-center transition-colors shadow-[0_0_15px_hsl(var(--primary)/0.4)]"
               >
                 <span className="material-icons text-sm">{isPlaying ? 'pause' : 'play_arrow'}</span>
               </button>
@@ -620,20 +604,20 @@ function App() {
                 </button>
                 
                 {showVolume && (
-                  <div className="absolute top-full right-0 mt-2 bg-black/80 backdrop-blur-md p-3 rounded-lg border border-white/10 flex flex-col items-center gap-2">
-                    <div 
-                      className="w-24 h-2 bg-gray-700 rounded-full cursor-pointer relative"
+                  <div className="absolute top-full right-0 mt-2 bg-card/90 backdrop-blur-md p-3 rounded-lg border border-border flex flex-col items-center gap-2">
+                    <div
+                      className="w-24 h-2 bg-muted rounded-full cursor-pointer relative"
                       onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); handleVolumeDrag(e); }}
                       onPointerMove={(e) => { if (e.buttons === 1) handleVolumeDrag(e); }}
                       onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
                     >
-                      <div 
-                        className="absolute left-0 top-0 h-full rounded-full shadow-lg pointer-events-none" 
-                        style={{ width: `${volume * 100}%`, backgroundColor: config.ThemeConfig.primaryColor }}
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-full bg-primary shadow-lg pointer-events-none"
+                        style={{ width: `${volume * 100}%` }}
                       ></div>
-                      <div 
-                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow-md pointer-events-none" 
-                        style={{ left: `calc(${volume * 100}% - 6px)`, backgroundColor: '#fff' }}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-foreground shadow-md pointer-events-none"
+                        style={{ left: `calc(${volume * 100}% - 6px)` }}
                       ></div>
                     </div>
                   </div>
@@ -641,34 +625,34 @@ function App() {
               </div>
             </div>
             
-            <div className="flex flex-col gap-1 bg-black/40 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-md min-w-[200px] md:min-w-[300px]">
+            <div className="flex flex-col gap-1 bg-card/60 px-4 py-2 rounded-lg border border-border backdrop-blur-md min-w-[200px] md:min-w-[300px]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shrink-0" style={{ backgroundColor: config.ThemeConfig.primaryColor }}>
-                  <span className="material-icons text-white text-sm">{currentTrack?.useVideoAudio ? 'videocam' : 'music_note'}</span>
+                <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                  <span className="material-icons text-sm">{currentTrack?.useVideoAudio ? 'videocam' : 'music_note'}</span>
                 </div>
                 <div className="flex flex-col flex-1 overflow-hidden min-w-0">
                   <div className="flex justify-between items-baseline w-full">
-                    <span className="text-xs font-bold text-white tracking-wide truncate">{currentTrack ? currentTrack.musicName : 'Música'}</span>
-                    <span className="text-[10px] font-mono whitespace-nowrap ml-2" style={{ color: config.ThemeConfig.primaryColor }}>{formatTime(currentTime)}</span>
+                    <span className="text-xs font-bold text-foreground tracking-wide truncate">{currentTrack ? currentTrack.musicName : 'Música'}</span>
+                    <span className="text-[10px] font-mono whitespace-nowrap ml-2 text-primary">{formatTime(currentTime)}</span>
                   </div>
-                  <span className="text-[10px] text-gray-400 uppercase tracking-widest truncate">{currentTrack ? currentTrack.musicAuthor : 'Artista'}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">{currentTrack ? currentTrack.musicAuthor : 'Artista'}</span>
                 </div>
               </div>
               
-              <div 
-                className={`h-1.5 bg-gray-700/50 rounded-full relative mt-1 ${currentTrack?.useVideoAudio ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer group'}`}
+              <div
+                className={`h-1.5 bg-muted/60 rounded-full relative mt-1 ${currentTrack?.useVideoAudio ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer group'}`}
                 onPointerDown={(e) => { if (!currentTrack?.useVideoAudio) { e.currentTarget.setPointerCapture(e.pointerId); handleSeek(e); } }}
                 onPointerMove={(e) => { if (!currentTrack?.useVideoAudio && e.buttons === 1) handleSeek(e); }}
                 onPointerUp={(e) => { if (!currentTrack?.useVideoAudio) e.currentTarget.releasePointerCapture(e.pointerId); }}
               >
-                <div 
-                  className="absolute left-0 top-0 h-full rounded-full shadow-lg transition-all" 
-                  style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`, backgroundColor: config.ThemeConfig.primaryColor, boxShadow: `0 0 10px ${config.ThemeConfig.primaryColor}` }}
+                <div
+                  className="absolute left-0 top-0 h-full rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.6)] transition-all"
+                  style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                 ></div>
                 {!currentTrack?.useVideoAudio && (
-                  <div 
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" 
-                    style={{ left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 4px)`, backgroundColor: '#fff' }}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-foreground shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 4px)` }}
                   ></div>
                 )}
               </div>
@@ -682,10 +666,10 @@ function App() {
           <div className="flex justify-between items-end mb-2 relative">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-white tracking-widest text-sm uppercase">{config.Texts.pleasewait}</span>
-                <span className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" style={{ borderColor: `${config.ThemeConfig.primaryColor}`, borderTopColor: 'transparent' }}></span>
+                <span className="font-bold text-foreground tracking-widest text-sm uppercase">{config.Texts.pleasewait}</span>
+                <span className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full"></span>
               </div>
-              <div className="text-xs text-gray-400 font-mono">{config.Texts.gameloading}</div>
+              <div className="text-xs text-muted-foreground font-mono">{config.Texts.gameloading}</div>
             </div>
             {/* Hotkey Hints above percentage */}
             <div className="absolute right-0 bottom-full mb-2 flex flex-col items-end gap-1.5 transition-all duration-300 opacity-60 hover:opacity-100">
@@ -713,16 +697,19 @@ function App() {
             </div>
 
             {/* Percentage text above the right side of the bar */}
-            <div className="absolute right-2 bottom-0 font-mono font-bold text-xl leading-none translate-y-[6px]" style={{ color: config.ThemeConfig.primaryColor }}>
+            <div className="absolute right-2 bottom-0 font-mono font-bold text-xl leading-none translate-y-[6px] text-primary">
               {progress}%
             </div>
           </div>
-          <div className="flex justify-between items-center mb-2 text-xs text-gray-500 font-mono">
+          <div className="flex justify-between items-center mb-2 text-xs text-muted-foreground font-mono">
             <div className="flex items-center gap-2">
             </div>
           </div>
-          <div className="h-4 w-full bg-gray-900 rounded-full overflow-hidden border border-white/10 relative shadow-inner">
-            <div className="h-full relative transition-all duration-300 ease-out" style={{ width: `${progress}%`, backgroundColor: config.ThemeConfig.primaryColor, backgroundImage: `linear-gradient(90deg, #ffffff33, ${config.ThemeConfig.primaryColor}, #00000033)`, boxShadow: `0 0 15px ${config.ThemeConfig.primaryBase}cc` }}>
+          <div className="h-4 w-full bg-card rounded-full overflow-hidden border border-border relative shadow-inner">
+            <div
+              className="h-full relative bg-primary bg-gradient-to-r from-primary/70 via-primary to-primary/70 shadow-[0_0_15px_hsl(var(--primary)/0.7)] transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            >
               <div className="absolute inset-0 shimmer"></div>
             </div>
           </div>

@@ -6,7 +6,8 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
     Wait(500)
 
     deferrals.handover({
-        config = Config or configData
+        config = Config or configData,
+        accentColor = GetConvar('mri:color', (Config and Config.AccentColor) or '#00E699'),
     })
 
     Wait(500)

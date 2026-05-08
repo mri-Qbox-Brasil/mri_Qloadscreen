@@ -63,14 +63,14 @@ Config.Texts = {
 }
 
 Config.ThemeConfig = {
-    primaryColor = '#5CE65C',
-    DiscordButton = {
-        backgroundColor = '#5CE65C',
-        textColor = '#ffffff',
-    },
     Logo = {
         file = 'logo.png', -- Filename of the logo inside config/logo/
         width = 300, -- Logo width in pixels
         height = -1, -- Logo height in pixels (-1 for auto)
     }
 }
+
+-- Cor de destaque vinda da convar global `mri:color` (compartilhada com
+-- toda a suite MRI: mri_Qmultichar, mri_Qspawn, mri_Qadmin). Defina via
+-- `setr mri:color "#hex"` no server.cfg ou pelo painel admin do mri_Qadmin.
+Config.AccentColor = GetConvar('mri:color', '#00E699')
