@@ -14,7 +14,6 @@ Config.StaffList = {
     { image = 'jj.png', staff = 'JJ' },
     { image = 'xstells.png', staff = 'XSTELLS' },
     { image = 'subzero.png', staff = 'SUBZERO' },
-    { image = 'spacer.jpeg', staff = 'SPACER' },
 }
 
 -- Video Configuration
