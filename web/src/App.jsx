@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
+// Fallback da staff quando Config.StaffList está vazia: membros públicos da
+// org (API) + lista mantida no repo user-stats (inclui membros privados).
+const GITHUB_PUBLIC_MEMBERS_URL = 'https://api.github.com/orgs/mri-Qbox-Brasil/public_members?per_page=100';
+const GITHUB_MEMBERS_JSON_URL = 'https://raw.githubusercontent.com/mri-Qbox-Brasil/user-stats/main/public/members.json';
+
 // Converte hex (#RRGGBB) → "H S% L%" e seta nas CSS vars do shadcn:
 // --primary, --ring, --primary-foreground, --primary-rgb. Mesmo padrão
 // do mri_Qmultichar / mri_Qspawn / mri_Qadmin.
@@ -50,6 +55,7 @@ function App() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [showHUD, setShowHUD] = useState(true);
   const [currentStaffIndex, setCurrentStaffIndex] = useState(0);
+  const [staffList, setStaffList] = useState([]);
 
   const [config, setConfig] = useState({
     UseOverlayEffect: false,
@@ -409,15 +415,45 @@ function App() {
     }
   }, [currentTrackIndex, isPlaying]);
  
+  // Staff: usa Config.StaffList; se vazia, busca os membros da org no GitHub
+  useEffect(() => {
+    if (!config.ShowStaff) return;
+    // Tabela vazia do Lua pode chegar como {} via handover
+    const configured = Array.isArray(config.StaffList) ? config.StaffList : [];
+    if (configured.length > 0) {
+      setStaffList(configured);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchJson = (url) => fetch(url).then(res => (res.ok ? res.json() : []));
+    Promise.allSettled([fetchJson(GITHUB_PUBLIC_MEMBERS_URL), fetchJson(GITHUB_MEMBERS_JSON_URL)])
+      .then(results => {
+        if (cancelled) return;
+        const byLogin = new Map();
+        results.forEach(result => {
+          if (result.status !== 'fulfilled' || !Array.isArray(result.value)) return;
+          result.value.forEach(member => {
+            if (member && member.login && !byLogin.has(member.login.toLowerCase())) {
+              byLogin.set(member.login.toLowerCase(), { image: member.avatar_url, staff: member.login });
+            }
+          });
+        });
+        setStaffList([...byLogin.values()]);
+      });
+    return () => { cancelled = true; };
+  }, [config.ShowStaff, config.StaffList]);
+
   // Staff Carousel Logic
   useEffect(() => {
-    if (config.ShowStaff && config.StaffList && config.StaffList.length > 1) {
+    setCurrentStaffIndex(0);
+    if (config.ShowStaff && staffList.length > 1) {
       const interval = setInterval(() => {
-        setCurrentStaffIndex(prev => (prev + 1) % config.StaffList.length);
+        setCurrentStaffIndex(prev => (prev + 1) % staffList.length);
       }, 4000);
       return () => clearInterval(interval);
     }
-  }, [config.ShowStaff, config.StaffList]);
+  }, [config.ShowStaff, staffList]);
  
   const currentTrack = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentTrackIndex] : null;
   const currentVideo = config.Backgrounds && config.Backgrounds.length > 0 ? config.Backgrounds[currentVideoIndex] : null;
@@ -551,19 +587,19 @@ function App() {
             </div>
 
             {/* Staff Carousel (Now in the left column) */}
-            {config.ShowStaff && config.StaffList && config.StaffList.length > 0 && (
+            {config.ShowStaff && staffList[currentStaffIndex] && (
               <div className="mt-8 flex items-center gap-4 bg-card/40 backdrop-blur-sm p-3 rounded-xl border border-border w-fit">
                 <div className="relative w-16 h-16 rounded-full border-2 border-primary overflow-hidden shadow-lg shadow-[0_0_12px_hsl(var(--primary)/0.4)]">
                   <img
                     key={currentStaffIndex}
-                    src={getAssetPath(config.StaffList[currentStaffIndex].image, 'staff')}
+                    src={getAssetPath(staffList[currentStaffIndex].image, 'staff')}
                     alt=""
                     className="w-full h-full object-cover animate-fade-in"
                   />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[8px] text-primary font-bold uppercase tracking-widest leading-none mb-1">Equipe Staff</span>
-                  <span key={`name-${currentStaffIndex}`} className="text-sm font-medium text-foreground italic animate-fade-in whitespace-nowrap">{config.StaffList[currentStaffIndex].staff}</span>
+                  <span key={`name-${currentStaffIndex}`} className="text-sm font-medium text-foreground italic animate-fade-in whitespace-nowrap">{staffList[currentStaffIndex].staff}</span>
                 </div>
               </div>
             )}

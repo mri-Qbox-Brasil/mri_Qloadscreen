@@ -3,7 +3,7 @@
 Coloque aqui as fotos dos membros da sua equipe para aparecerem no carrossel da tela de carregamento.
 
 ## 📌 Instruções:
-1.  As imagens podem ser nos formatos **.png, .jpg ou .jpeg**.
+1.  As imagens podem ser nos formatos **.png, .jpg ou .jpeg**, ou uma URL começando com `http`.
     *   **Dica:** Use `.png` transparente para um efeito mais profissional.
 2.  O nome do arquivo deve ser exatamente o mesmo que você colocar no `config.lua`.
     *   Exemplo no `config.lua`: `{ image = 'pedro.png', staff = 'Pedro - Admin' }`

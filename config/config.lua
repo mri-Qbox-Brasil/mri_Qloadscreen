@@ -5,16 +5,10 @@ Config.DiscordUrl = 'https://discord.gg/mriqbox' -- Discord URL.
 
 -- Configuração da Staff
 Config.ShowStaff = true -- Ativar carrossel da staff
-Config.StaffList = {
-    { image = 'murai.png', staff = 'MURAI' },
-    { image = 'g5.jpeg', staff = 'G5' },
-    { image = 'snow.png', staff = 'SNOW' },
-    { image = 'gh.jpeg', staff = 'GH' },
-    { image = 'gordela.png', staff = 'GORDELA' },
-    { image = 'jj.png', staff = 'JJ' },
-    { image = 'xstells.png', staff = 'XSTELLS' },
-    { image = 'subzero.png', staff = 'SUBZERO' },
-}
+-- Vazia = busca os membros da org mri-Qbox-Brasil no GitHub.
+-- Para usar sua própria equipe, adicione itens como:
+--   { image = 'pedro.png', staff = 'Pedro - Admin' }  (imagem em config/staffs/ ou URL http)
+Config.StaffList = {}
 
 -- Video Configuration
 Config.videourl = true      -- If true, plays video from an external link (Config.Backgrounds.file must be a link)
