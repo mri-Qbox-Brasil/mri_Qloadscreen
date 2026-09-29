@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # Permite re-rodar a release sem precisar de um commit novo (ex.: quando o
+  # publish falhou por token/registry e o commit de versão já foi feito).
+  workflow_dispatch: {}
+
+jobs:
+  release:
+    # id-token: write e obrigatorio para o OIDC do Infisical (o callable so
+    # recebe o id-token se o job chamador conceder). Os demais espelham o que o
+    # callable declara, para nao restringir o GITHUB_TOKEN abaixo do necessario.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      packages: write
+      models: read
+      id-token: write
+    uses: mri-Qbox-Brasil/workflows/.github/workflows/callable-release.yml@main
+    # Explícito em vez de `secrets: inherit`, que entregaria o cofre inteiro do
+    # repo/org ao callable. Todos são opcionais: os que faltarem vêm do Infisical
+    # por OIDC, e o notificador apenas pula o branding que não existir.
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_MODELS_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
+      UPDATE_DISCORD_WEBHOOK: ${{ secrets.UPDATE_DISCORD_WEBHOOK }}
+      LOGO_MRIQBOX_URL: ${{ secrets.LOGO_MRIQBOX_URL }}
+      RESOURCE_MRIQBOX_URL: ${{ secrets.RESOURCE_MRIQBOX_URL }}
+      INVITE_DISCORD_URL: ${{ secrets.INVITE_DISCORD_URL }}
+      DOCS_MRIQBOX_URL: ${{ secrets.DOCS_MRIQBOX_URL }}
