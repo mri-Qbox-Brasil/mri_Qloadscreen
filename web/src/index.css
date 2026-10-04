@@ -39,3 +39,9 @@
 .ls-fade {
   animation: ls-fade 0.6s ease-out both;
 }
+
+/* The loadscreen is a full-screen backdrop: ignore the /uiconfig opacity, or GTA's loading shows through. */
+html.loadscreen,
+html.loadscreen body {
+  background-color: hsl(var(--background));
+}

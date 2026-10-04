@@ -155,7 +155,7 @@ export function LoadScreen({ config, progress, stage, preview = false }) {
   const hud = `transition-opacity duration-500 ${hudVisible ? 'opacity-100' : 'pointer-events-none opacity-0'}`
 
   return (
-    <div className="relative h-full w-full select-none overflow-hidden bg-background text-foreground">
+    <div className="relative h-full w-full select-none overflow-hidden bg-[hsl(var(--background))] text-foreground">
       {track?.video && (
         <video
           key={track.video}
