@@ -1,2 +1,4 @@
-
 html.rar
+data/config.json
+# Pre-panel config, imported once into data/config.json
+config/config.lua

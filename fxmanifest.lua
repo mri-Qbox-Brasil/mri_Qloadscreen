@@ -1,7 +1,8 @@
 fx_version 'cerulean'
+lua54 'yes'
 game 'gta5'
 
-author 'SnowDeve'
+author 'MRI BRASIL'
 description 'mri_Qloadscreen'
 version '2.1.0'
 
@@ -9,22 +10,18 @@ loadscreen 'html/index.html'
 loadscreen_cursor 'yes'
 loadscreen_manual_shutdown 'yes'
 
-shared_script 'config/config.lua'
+shared_script '@ox_lib/init.lua'
 server_script 'server.lua'
 client_script 'client.lua'
 
 files {
-	'html/index.html',
+    'html/index.html',
+    'html/admin.html',
     'html/assets/*',
-    'config/config.lua',
-    'config/logo/*.png',
-    'config/logo/*.jpg',
-    'config/logo/*.jpeg',
-    'config/staffs/*.png',
-    'config/staffs/*.jpg',
-    'config/staffs/*.jpeg',
-    'config/video/*.mp4',
-    'config/video/*.webm',
-    'config/audio/*.mp3',
-    'config/audio/*.ogg',
+    'config/logo/*',
+    'config/staffs/*',
+    'config/video/*',
+    'config/audio/*',
 }
+
+dependency 'ox_lib'

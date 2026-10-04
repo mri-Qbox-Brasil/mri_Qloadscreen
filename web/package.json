@@ -10,12 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mriqbox/ui-kit": "^3.7.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
+    "@mriqbox/ui-kit": "^4.30.1",
+    "lucide-react": "^1.50.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwind-merge": "^2.2.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
