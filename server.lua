@@ -5,16 +5,16 @@ local MAX_STAFF = 50
 
 local defaults = {
     texts = {
-        title = 'BEM-VINDO A MRI',
-        subtitle = 'Comunidade BR onde o RP é levado a sério e transformamos suas ideias em realidade!',
-        loading = 'Carregando a cidade',
-        discord = 'Discord',
+        title = 'MRI QBOX',
+        subtitle = 'Menos configuração.\nMais criação.',
+        loading = 'CARREGANDO...',
+        discord = 'Entre agora!',
     },
-    logo = { file = 'logo.png', width = 220 },
-    discordUrl = 'https://discord.gg/mriqbox',
+    logo = { file = 'logo.png', width = 70 },
+    discordUrl = 'https://discord.mriqbox.com.br',
     overlay = true,
     showHints = true,
-    volume = 0.5,
+    volume = 0.1,
     -- Empty members = the mri-Qbox-Brasil org members from GitHub.
     staff = { enabled = true, members = {} },
     tracks = {
@@ -24,13 +24,6 @@ local defaults = {
             audio = '',
             title = 'GTA6',
             artist = 'Rockstar Games',
-        },
-        {
-            video = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/bemvindoa.mp4',
-            useVideoAudio = true,
-            audio = '',
-            title = 'MriQbox',
-            artist = 'mriqbox',
         },
     },
 }
