@@ -52,8 +52,8 @@ function StaffChip({ staff }) {
   if (!member) return null
 
   return (
-    <div className="mri-surface-card flex h-12 items-center gap-3 rounded-full border border-border bg-card/70 pl-1.5 pr-5">
-      <img key={`img-${index}`} src={assetUrl(member.image, 'staffs')} alt="" className="ls-fade h-9 w-9 rounded-full bg-muted object-cover" />
+    <div className="mri-surface-card flex h-12 items-center gap-3 rounded-lg border border-border bg-card/70 pl-1.5 pr-5">
+      <img key={`img-${index}`} src={assetUrl(member.image, 'staffs')} alt="" className="ls-fade h-9 w-9 rounded-md bg-muted object-cover" />
       <div key={`name-${index}`} className="ls-fade flex flex-col leading-tight">
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Staff</span>
         <span className="text-sm font-medium text-foreground">{member.name}</span>
