@@ -114,6 +114,9 @@ A porcentagem vem do `loadProgress` do FiveM e só anda pra frente. Ao lado do t
 carregamento aparece a etapa atual: iniciando o jogo, preparando o mapa, carregando o mapa,
 carregando o mundo e entrando na sessão.
 
+O spinner de "carregando" que o GTA desenha no canto inferior direito fica desligado: o
+`server.lua` liga a convar `sv_showBusySpinnerOnLoadingScreen` como `false` ao subir.
+
 ## Tema e cores
 
 A tela segue o tema da suíte (`@mriqbox/ui-kit`), lido no momento da conexão e enviado à NUI

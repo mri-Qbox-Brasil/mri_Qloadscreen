@@ -30,6 +30,9 @@ local defaults = {
 
 local current
 
+-- Hides GTA's busy spinner drawn over the loadscreen (bottom right).
+SetConvarReplicated('sv_showBusySpinnerOnLoadingScreen', 'false')
+
 local function str(value, fallback, max)
     if type(value) ~= 'string' then return fallback end
     return value:sub(1, max or 300)
