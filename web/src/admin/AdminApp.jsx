@@ -1,17 +1,10 @@
-import { useEffect } from 'react'
+import { usePluginBridgeGuest } from '@mriqbox/ui-kit'
 import { isEnvBrowser } from '../lib/assets'
-import { usePluginBridge } from '../lib/pluginBridge'
 import { ConfigPanel } from './ConfigPanel'
 
-/** Embedded in mri_Qadmin; outside the game (vite dev) it opens straight away. */
+/** Embedded in mri_Qadmin (the kit bridge applies its theme and closes on ESC); outside the game (vite dev) it opens straight away. */
 export default function AdminApp() {
-  const { initialized, requestClose } = usePluginBridge()
-
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && requestClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [requestClose])
+  const { initialized, requestClose } = usePluginBridgeGuest()
 
   if (!initialized && !isEnvBrowser()) return null
 

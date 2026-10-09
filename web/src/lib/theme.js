@@ -7,17 +7,12 @@ import {
   setSuiteBackground,
 } from '@mriqbox/ui-kit'
 
-/**
- * Suite style from the ox_lib /uiconfig. `withOverrides = false` inside mri_Qadmin:
- * the host already sends the resolved accent and background.
- */
-export function applySuiteUiConfig(cfg, withOverrides = true) {
+/** Suite style from the ox_lib /uiconfig; inside mri_Qadmin the kit plugin bridge applies the host theme. */
+export function applySuiteUiConfig(cfg) {
   if (!cfg || typeof cfg !== 'object') return
   applyUiConfig(cfg)
-  if (withOverrides) {
-    setAccentOverride(cfg.accentColor)
-    setBackgroundOverride(cfg.backgroundColor)
-  }
+  setAccentOverride(cfg.accentColor)
+  setBackgroundOverride(cfg.backgroundColor)
   document.documentElement.setAttribute('data-theme', cfg.theme === 'glass' ? 'glass' : 'dark')
 }
 
