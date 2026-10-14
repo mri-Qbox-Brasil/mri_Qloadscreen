@@ -1,0 +1,1 @@
+import{l as e,I as o,d as a,y as n,O as i,g as r}from"./ScaledStage.js";function s(t){!t||typeof t!="object"||(n(t),i(t.accentColor),r(t.backgroundColor),document.documentElement.setAttribute("data-theme",t.theme==="glass"?"glass":"dark"))}function p(t){e(t)&&o(t)}function l(t){a(typeof t=="string"?t:"")}export{p as a,l as b,s as c};

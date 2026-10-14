@@ -185,16 +185,21 @@ local function isAdmin(source)
     return IsPlayerAceAllowed(source, 'mri_Qloadscreen.admin') or IsPlayerAceAllowed(source, 'command')
 end
 
+local function getTheme()
+    return {
+        accentColor = GetConvar('mri:color', '#00E699'),
+        backgroundColor = GetConvar('mri:backgroundColor', ''),
+        uiConfig = getUiConfig(),
+    }
+end
+
 AddEventHandler('playerConnecting', function(_, _, deferrals)
     deferrals.defer()
     Wait(0)
 
-    deferrals.handover({
-        config = current,
-        accentColor = GetConvar('mri:color', '#00E699'),
-        backgroundColor = GetConvar('mri:backgroundColor', ''),
-        uiConfig = getUiConfig(),
-    })
+    local handover = getTheme()
+    handover.config = current
+    deferrals.handover(handover)
 
     deferrals.done()
 end)
@@ -202,6 +207,11 @@ end)
 lib.callback.register('mri_Qloadscreen:getConfig', function(source)
     if not isAdmin(source) then return false end
     return { config = current, defaults = normalize(nil) }
+end)
+
+lib.callback.register('mri_Qloadscreen:getTheme', function(source)
+    if not isAdmin(source) then return false end
+    return getTheme()
 end)
 
 -- Uploaded files only reach players after a restart; StopResource on itself is a no-op, so mri_Qadmin does it (client.lua).
@@ -226,12 +236,13 @@ end)
 
 -- FXServer drops an HTTP request whose body is over 5 MiB, so files go in 4 MiB parts.
 local PART_BYTES <const> = 4 * 1024 * 1024
-local MAX_UPLOAD_BYTES <const> = 100 * 1024 * 1024
 local SLOT_TTL <const> = 60
+local MB <const> = 1024 * 1024
 
 local UPLOAD_KINDS <const> = {
-    video = { folder = 'config/video', exts = { mp4 = true, webm = true } },
-    audio = { folder = 'config/audio', exts = { mp3 = true, ogg = true, wav = true } },
+    video = { folder = 'config/video', maxBytes = 100 * MB, exts = { mp4 = true, webm = true } },
+    audio = { folder = 'config/audio', maxBytes = 100 * MB, exts = { mp3 = true, ogg = true, wav = true } },
+    logo = { folder = 'config/logo', maxBytes = 10 * MB, exts = { png = true, jpg = true, jpeg = true, webp = true, gif = true } },
 }
 
 local slots = {}
@@ -274,7 +285,7 @@ lib.callback.register('mri_Qloadscreen:uploadStart', function(source, data)
 
     local size = math.tointeger(tonumber(data.size))
     if not size or size <= 0 then return false, 'arquivo vazio' end
-    if size > MAX_UPLOAD_BYTES then return false, ('maior que %d MB'):format(MAX_UPLOAD_BYTES // 1048576) end
+    if size > kind.maxBytes then return false, ('maior que %d MB'):format(kind.maxBytes // MB) end
 
     local name = uniqueName(kind, data.name)
     if not name then return false, 'formato não aceito' end

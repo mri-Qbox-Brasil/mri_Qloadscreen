@@ -3,6 +3,23 @@ RegisterNUICallback('getConfig', function(_, cb)
     cb(lib.callback.await('mri_Qloadscreen:getConfig', false) or false)
 end)
 
+-- Fullscreen preview on the ui_page; mri_Qadmin hides meanwhile and comes back on ESC.
+RegisterNUICallback('openFullscreen', function(data, cb)
+    cb(true)
+    local theme = lib.callback.await('mri_Qloadscreen:getTheme', false)
+    if not theme then return end
+
+    if GetResourceState('mri_Qadmin') == 'started' then exports.mri_Qadmin:ClosePlugin('loadscreen') end
+    SendNUIMessage({ action = 'fullscreen', config = data, theme = theme })
+    SetNuiFocus(true, true)
+end)
+
+RegisterNUICallback('closeFullscreen', function(_, cb)
+    cb(true)
+    SetNuiFocus(false, false)
+    if GetResourceState('mri_Qadmin') == 'started' then exports.mri_Qadmin:OpenPlugin('loadscreen') end
+end)
+
 -- The NUI is https and CEF only lets fetch reach https or localhost: local server first, then the Cfx.re proxy.
 RegisterNUICallback('uploadStart', function(data, cb)
     local ok, result = lib.callback.await('mri_Qloadscreen:uploadStart', false, data)

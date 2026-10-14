@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowUp, Film, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, Volume2, VolumeX, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Film, Maximize, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, Volume2, VolumeX, X } from 'lucide-react'
 import {
   MriButton,
   MriCard,
@@ -56,7 +56,7 @@ function ListActions({ index, length, onMove, onRemove }) {
   )
 }
 
-const UPLOAD_ACCEPT = { video: '.mp4,.webm', audio: '.mp3,.ogg,.wav' }
+const UPLOAD_ACCEPT = { video: '.mp4,.webm', audio: '.mp3,.ogg,.wav', logo: '.png,.jpg,.jpeg,.webp,.gif' }
 
 function UploadButton({ kind, onUploaded, onStatus }) {
   const inputRef = useRef(null)
@@ -203,8 +203,11 @@ export function ConfigPanel({ onClose }) {
           </Section>
 
           <Section icon={MonitorPlay} title="Visual" description="Logo, escurecimento do vídeo e som.">
-            <MriSettingField label="Logo" description="Arquivo em config/logo/ ou link. Vazio esconde a logo.">
-              <MriInput value={draft.logo.file} placeholder="logo.png" onChange={(e) => patchIn('logo', 'file', e.target.value)} />
+            <MriSettingField label="Logo" description="Envie a imagem pelo botão (até 10 MB) ou use um link. Vazio esconde a logo.">
+              <div className="flex items-center gap-2">
+                <MriInput className="flex-1" value={draft.logo.file} placeholder="logo.png" onChange={(e) => patchIn('logo', 'file', e.target.value)} />
+                <UploadButton kind="logo" onUploaded={(name) => patchIn('logo', 'file', name)} onStatus={setStatus} />
+              </div>
             </MriSettingField>
             <MriSettingField label={`Largura da logo: ${draft.logo.width}px`}>
               <MriSlider value={draft.logo.width} min={40} max={600} step={10} size="sm" onChange={(v) => patchIn('logo', 'width', v)} />
@@ -301,10 +304,24 @@ export function ConfigPanel({ onClose }) {
         <div className="min-h-0 border-l border-border p-5">
           <div className="mb-2 flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prévia</p>
-            <MriButton size="sm" variant={sound ? 'default' : 'outline'} onClick={() => setSound((v) => !v)}>
-              {sound ? <Volume2 className="mr-1.5 h-4 w-4" /> : <VolumeX className="mr-1.5 h-4 w-4" />}
-              {sound ? 'Ouvindo' : 'Ouvir'}
-            </MriButton>
+            <div className="flex items-center gap-2">
+              <MriButton size="sm" variant={sound ? 'default' : 'outline'} onClick={() => setSound((v) => !v)}>
+                {sound ? <Volume2 className="mr-1.5 h-4 w-4" /> : <VolumeX className="mr-1.5 h-4 w-4" />}
+                {sound ? 'Ouvindo' : 'Ouvir'}
+              </MriButton>
+              <MriButton
+                size="sm"
+                variant="outline"
+                disabled={isEnvBrowser()}
+                onClick={() => {
+                  // The panel stays mounted while hidden; muting it avoids two copies of the sound.
+                  setSound(false)
+                  fetchNui('openFullscreen', draft)
+                }}
+              >
+                <Maximize className="mr-1.5 h-4 w-4" /> Tela cheia
+              </MriButton>
+            </div>
           </div>
           <ScaledStage className="aspect-video w-full rounded-lg border border-border">
             <LoadScreen config={draft} progress={62} stage="Carregando o mapa" preview sound={sound} />

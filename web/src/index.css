@@ -45,3 +45,9 @@ html.loadscreen,
 html.loadscreen body {
   background-color: hsl(var(--background));
 }
+
+/* The fullscreen preview is the resource's ui_page: transparent over the game while closed. */
+html.preview,
+html.preview body {
+  background: transparent;
+}

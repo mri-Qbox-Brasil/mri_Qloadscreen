@@ -1,0 +1,1 @@
+import{i as n}from"./ScaledStage.js";const s="mri_Qloadscreen";async function i(t,e){return n()?void 0:(await fetch(`https://${s}/${t}`,{method:"post",headers:{"Content-Type":"application/json; charset=UTF-8"},body:JSON.stringify(e??{})})).json()}export{i as f};
