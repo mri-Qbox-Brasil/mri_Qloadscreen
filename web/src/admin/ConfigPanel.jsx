@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowUp, Film, Maximize, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, Volume2, VolumeX, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Film, FolderOpen, Maximize, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, Volume2, VolumeX, X } from 'lucide-react'
 import {
   MriButton,
   MriCard,
@@ -58,7 +58,7 @@ function ListActions({ index, length, onMove, onRemove }) {
 
 const UPLOAD_ACCEPT = { video: '.mp4,.webm', audio: '.mp3,.ogg,.wav', logo: '.png,.jpg,.jpeg,.webp,.gif' }
 
-function UploadButton({ kind, onUploaded, onStatus }) {
+function UploadButton({ kind, onUploaded, onStatus, onDone }) {
   const inputRef = useRef(null)
   const [progress, setProgress] = useState(null)
 
@@ -71,6 +71,7 @@ function UploadButton({ kind, onUploaded, onStatus }) {
     try {
       const name = await uploadFile(file, kind, setProgress)
       onUploaded(name)
+      onDone?.()
       onStatus({ type: 'ok', text: `${name} enviado. Clique em Salvar pra valer.` })
     } catch (err) {
       onStatus({ type: 'error', text: `Não foi possível enviar: ${err.message}` })
@@ -95,6 +96,88 @@ function UploadButton({ kind, onUploaded, onStatus }) {
   )
 }
 
+const FILE_GROUPS = [
+  { kind: 'video', label: 'Vídeos' },
+  { kind: 'audio', label: 'Músicas' },
+  { kind: 'logo', label: 'Logos' },
+]
+
+const formatSize = (bytes) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`)
+
+/** Uploaded files with delete; a file the draft or the saved config uses can't be deleted. */
+function FilesSection({ draft, reloadKey, onStatus }) {
+  const [files, setFiles] = useState(null)
+  const [confirming, setConfirming] = useState(null)
+  const [busy, setBusy] = useState(null)
+  const [localKey, setLocalKey] = useState(0)
+
+  useEffect(() => {
+    if (isEnvBrowser()) return
+    fetchNui('listFiles').then((res) => setFiles(res || null))
+  }, [reloadKey, localKey])
+
+  const inDraft = {
+    video: new Set(draft.tracks.map((t) => t.video)),
+    audio: new Set(draft.tracks.map((t) => t.audio)),
+    logo: new Set([draft.logo.file]),
+  }
+
+  const remove = async (kind, name) => {
+    const key = `${kind}/${name}`
+    if (confirming !== key) {
+      setConfirming(key)
+      return
+    }
+    setConfirming(null)
+    setBusy(key)
+    const res = await fetchNui('deleteFile', { kind, name })
+    setBusy(null)
+    if (res?.ok) onStatus({ type: 'ok', text: `${name} apagado. A tela reinicia em alguns segundos para tirar do download.` })
+    else onStatus({ type: 'error', text: `Não foi possível apagar: ${res?.error || 'erro'}` })
+    setLocalKey((k) => k + 1)
+  }
+
+  return (
+    <Section icon={FolderOpen} title="Arquivos" description="O que já foi enviado. Apague o que sobrou de teste; o que está em uso não pode ser apagado.">
+      {!files && <p className="text-xs text-muted-foreground">{isEnvBrowser() ? 'Só no jogo.' : 'Carregando...'}</p>}
+      {files &&
+        FILE_GROUPS.map(({ kind, label }) => (
+          <div key={kind} className="space-y-1.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {label} ({files[kind]?.length || 0})
+            </p>
+            {!files[kind]?.length && <p className="text-xs text-muted-foreground">Nenhum arquivo.</p>}
+            {files[kind]?.map((file) => {
+              const key = `${kind}/${file.name}`
+              const used = file.used || inDraft[kind].has(file.name)
+              return (
+                <div key={key} className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5">
+                  <span className="min-w-0 flex-1 truncate text-sm" title={file.name}>{file.name}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{formatSize(file.size)}</span>
+                  {used ? (
+                    <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-[11px] font-semibold text-primary">Em uso</span>
+                  ) : (
+                    <MriButton
+                      size="sm"
+                      variant={confirming === key ? 'destructive' : 'ghost'}
+                      className={`h-7 shrink-0 ${confirming === key ? '' : 'text-muted-foreground hover:text-destructive'}`}
+                      isLoading={busy === key}
+                      onClick={() => remove(kind, file.name)}
+                      onBlur={() => confirming === key && setConfirming(null)}
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5" />
+                      {confirming === key ? 'Confirmar' : 'Apagar'}
+                    </MriButton>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+    </Section>
+  )
+}
+
 const moveItem = (list, index, dir) => {
   const next = [...list]
   const [item] = next.splice(index, 1)
@@ -109,6 +192,7 @@ export function ConfigPanel({ onClose }) {
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState(null)
   const [sound, setSound] = useState(false)
+  const [filesKey, setFilesKey] = useState(0)
 
   useEffect(() => {
     const load = isEnvBrowser() ? Promise.resolve({ config: DEV_CONFIG, defaults: DEV_CONFIG }) : fetchNui('getConfig')
@@ -206,7 +290,7 @@ export function ConfigPanel({ onClose }) {
             <MriSettingField label="Logo" description="Envie a imagem pelo botão (até 10 MB) ou use um link. Vazio esconde a logo.">
               <div className="flex items-center gap-2">
                 <MriInput className="flex-1" value={draft.logo.file} placeholder="logo.png" onChange={(e) => patchIn('logo', 'file', e.target.value)} />
-                <UploadButton kind="logo" onUploaded={(name) => patchIn('logo', 'file', name)} onStatus={setStatus} />
+                <UploadButton kind="logo" onUploaded={(name) => patchIn('logo', 'file', name)} onStatus={setStatus} onDone={() => setFilesKey((k) => k + 1)} />
               </div>
             </MriSettingField>
             <MriSettingField label={`Largura da logo: ${draft.logo.width}px`}>
@@ -253,7 +337,7 @@ export function ConfigPanel({ onClose }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <MriInput className="flex-1" value={track.video} placeholder="Vídeo: video.mp4 ou https://..." onChange={(e) => setTrack(i, 'video', e.target.value)} />
-                  <UploadButton kind="video" onUploaded={(name) => setTrack(i, 'video', name)} onStatus={setStatus} />
+                  <UploadButton kind="video" onUploaded={(name) => setTrack(i, 'video', name)} onStatus={setStatus} onDone={() => setFilesKey((k) => k + 1)} />
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm">Usar o som do vídeo</span>
@@ -262,7 +346,7 @@ export function ConfigPanel({ onClose }) {
                 {!track.useVideoAudio && (
                   <div className="flex items-center gap-2">
                     <MriInput className="flex-1" value={track.audio} placeholder="Música: musica.mp3 ou https://..." onChange={(e) => setTrack(i, 'audio', e.target.value)} />
-                    <UploadButton kind="audio" onUploaded={(name) => setTrack(i, 'audio', name)} onStatus={setStatus} />
+                    <UploadButton kind="audio" onUploaded={(name) => setTrack(i, 'audio', name)} onStatus={setStatus} onDone={() => setFilesKey((k) => k + 1)} />
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
@@ -299,6 +383,8 @@ export function ConfigPanel({ onClose }) {
               </>
             )}
           </Section>
+
+          <FilesSection draft={draft} reloadKey={filesKey} onStatus={setStatus} />
         </div>
 
         <div className="min-h-0 border-l border-border p-5">

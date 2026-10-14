@@ -299,6 +299,57 @@ lib.callback.register('mri_Qloadscreen:uploadStart', function(source, data)
     return true, { token = token, name = name, partBytes = PART_BYTES, webBase = GetConvar('web_baseUrl', '') }
 end)
 
+local function usedFiles()
+    local used = { video = {}, audio = {}, logo = {} }
+    for _, track in ipairs(current.tracks) do
+        used.video[track.video] = true
+        used.audio[track.audio] = true
+    end
+    used.logo[current.logo.file] = true
+    return used
+end
+
+lib.callback.register('mri_Qloadscreen:listFiles', function(source)
+    if not isAdmin(source) then return false end
+    local used = usedFiles()
+    local out = {}
+    for id, kind in pairs(UPLOAD_KINDS) do
+        out[id] = {}
+        for _, file in ipairs(exports[cache.resource]:listUploadFolder(kind.folder) or {}) do
+            local ext = file.name:match('%.(%w+)$')
+            if ext and kind.exts[ext:lower()] then
+                file.used = used[id][file.name] == true
+                out[id][#out[id] + 1] = file
+            end
+        end
+        table.sort(out[id], function(a, b) return a.modified > b.modified end)
+    end
+    return out
+end)
+
+lib.callback.register('mri_Qloadscreen:deleteFile', function(source, data)
+    if not isAdmin(source) then return false, 'sem permissão' end
+    local kind = type(data) == 'table' and UPLOAD_KINDS[data.kind]
+    local name = kind and type(data.name) == 'string' and data.name or ''
+    -- Same shape uniqueName produces: no path separators or dot segments can reach the folder.
+    if not kind or not name:match('^[%w_%-]+%.%w+$') or not kind.exts[(name:match('%.(%w+)$') or ''):lower()] then
+        return false, 'arquivo inválido'
+    end
+    if usedFiles()[data.kind][name] then return false, 'em uso na config salva' end
+
+    if not exports[cache.resource]:deleteUploadFile(kind.folder, name) then return false, 'falha ao apagar' end
+    pendingRestart = true
+    lib.print.info(('%s apagou %s/%s'):format(GetPlayerName(source) or source, kind.folder, name))
+    return true
+end)
+
+lib.callback.register('mri_Qloadscreen:applyFiles', function(source)
+    if not isAdmin(source) then return false end
+    local restart = pendingRestart
+    pendingRestart = false
+    return restart
+end)
+
 AddEventHandler('playerDropped', function()
     local src = source
     for token, slot in pairs(slots) do

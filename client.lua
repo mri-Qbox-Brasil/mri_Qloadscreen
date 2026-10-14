@@ -35,14 +35,36 @@ RegisterNUICallback('uploadStart', function(data, cb)
     cb({ ok = true, token = result.token, name = result.name, partBytes = result.partBytes, urls = urls })
 end)
 
+-- File changes join the players' download only after a restart, done by mri_Qadmin with the admin's own permission.
+local function restartViaQadmin(delay)
+    if GetResourceState('mri_Qadmin') ~= 'started' then return end
+    SetTimeout(delay, function()
+        lib.callback.await('mri_Qadmin:callback:ChangeResourceState', false, { name = GetCurrentResourceName(), state = 'restart' })
+    end)
+end
+
 RegisterNUICallback('saveConfig', function(data, cb)
     local ok, result, restart = lib.callback.await('mri_Qloadscreen:saveConfig', false, data)
     cb({ ok = ok, config = ok and result or nil, error = not ok and result or nil, restarted = restart == true })
+    if restart then restartViaQadmin(300) end
+end)
 
-    -- New uploads join the players' download only after a restart, done by mri_Qadmin with the admin's own permission.
-    if restart and GetResourceState('mri_Qadmin') == 'started' then
-        SetTimeout(300, function()
-            lib.callback.await('mri_Qadmin:callback:ChangeResourceState', false, { name = GetCurrentResourceName(), state = 'restart' })
-        end)
-    end
+RegisterNUICallback('listFiles', function(_, cb)
+    cb(lib.callback.await('mri_Qloadscreen:listFiles', false) or false)
+end)
+
+-- Several deletes in a row end in a single restart, a few seconds after the last one.
+local deleteRound = 0
+
+RegisterNUICallback('deleteFile', function(data, cb)
+    local ok, err = lib.callback.await('mri_Qloadscreen:deleteFile', false, data)
+    cb({ ok = ok, error = err })
+    if not ok then return end
+
+    deleteRound = deleteRound + 1
+    local round = deleteRound
+    SetTimeout(4000, function()
+        if round ~= deleteRound then return end
+        if lib.callback.await('mri_Qloadscreen:applyFiles', false) then restartViaQadmin(0) end
+    end)
 end)

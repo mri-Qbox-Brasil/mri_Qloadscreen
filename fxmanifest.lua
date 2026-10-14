@@ -12,7 +12,10 @@ loadscreen_manual_shutdown 'yes'
 ui_page 'html/preview.html'
 
 shared_script '@ox_lib/init.lua'
-server_script 'server.lua'
+server_scripts {
+    'files.js',
+    'server.lua',
+}
 client_script 'client.lua'
 
 files {
