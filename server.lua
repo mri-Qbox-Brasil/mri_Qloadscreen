@@ -204,6 +204,17 @@ lib.callback.register('mri_Qloadscreen:getConfig', function(source)
     return { config = current, defaults = normalize(nil) }
 end)
 
+-- Uploaded files only reach players after a restart (the client downloads the file list from resource start).
+local pendingRestart = false
+
+local function restartSelf()
+    pendingRestart = false
+    SetTimeout(500, function()
+        ExecuteCommand('refresh')
+        ExecuteCommand('ensure ' .. cache.resource)
+    end)
+end
+
 lib.callback.register('mri_Qloadscreen:saveConfig', function(source, payload)
     if not isAdmin(source) then return false, 'sem permissão' end
     if type(payload) ~= 'table' then return false, 'dados inválidos' end
@@ -212,7 +223,158 @@ lib.callback.register('mri_Qloadscreen:saveConfig', function(source, payload)
     if not save(config) then return false, 'falha ao salvar' end
 
     current = config
+    if pendingRestart then restartSelf() end
     return true, current
+end)
+
+--------------------------------------------------------------------------------
+-- Upload from the panel: parts of PART_BYTES over the server's own HTTP port.
+--------------------------------------------------------------------------------
+
+-- FXServer drops an HTTP request whose body is over 5 MiB, so files go in 4 MiB parts.
+local PART_BYTES <const> = 4 * 1024 * 1024
+local MAX_UPLOAD_BYTES <const> = 100 * 1024 * 1024
+local SLOT_TTL <const> = 60
+
+local UPLOAD_KINDS <const> = {
+    video = { folder = 'config/video', exts = { mp4 = true, webm = true } },
+    audio = { folder = 'config/audio', exts = { mp3 = true, ogg = true, wav = true } },
+}
+
+local slots = {}
+
+local function newToken()
+    return ('%08x%08x%08x%08x'):format(
+        math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF),
+        math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF))
+end
+
+local function fileExists(path)
+    local file = io.open(GetResourcePath(cache.resource) .. '/' .. path, 'rb')
+    if file then file:close() end
+    return file ~= nil
+end
+
+---Safe file name inside the kind's folder; never overwrites an existing file.
+local function uniqueName(kind, original)
+    local base, ext = tostring(original):match('^(.-)%.(%w+)$')
+    ext = ext and ext:lower()
+    if not ext or not kind.exts[ext] then return nil end
+
+    base = base:lower():gsub('[^%w_%-]+', '_'):gsub('^[_%-]+', ''):sub(1, 60)
+    if base == '' then base = 'arquivo' end
+
+    local name, n = ('%s.%s'):format(base, ext), 1
+    while fileExists(('%s/%s'):format(kind.folder, name)) do
+        n = n + 1
+        name = ('%s-%d.%s'):format(base, n, ext)
+    end
+    return name
+end
+
+lib.callback.register('mri_Qloadscreen:uploadStart', function(source, data)
+    if not isAdmin(source) then return false, 'sem permissão' end
+    if type(data) ~= 'table' then return false, 'dados inválidos' end
+
+    local kind = UPLOAD_KINDS[data.kind]
+    if not kind then return false, 'tipo inválido' end
+
+    local size = math.tointeger(tonumber(data.size))
+    if not size or size <= 0 then return false, 'arquivo vazio' end
+    if size > MAX_UPLOAD_BYTES then return false, ('maior que %d MB'):format(MAX_UPLOAD_BYTES // 1048576) end
+
+    local name = uniqueName(kind, data.name)
+    if not name then return false, 'formato não aceito' end
+
+    for token, slot in pairs(slots) do
+        if slot.src == source then slots[token] = nil end
+    end
+
+    local token = newToken()
+    slots[token] = { src = source, path = ('%s/%s'):format(kind.folder, name), name = name, size = size, parts = {}, received = 0, expires = os.time() + SLOT_TTL }
+    return true, { token = token, name = name, partBytes = PART_BYTES, webBase = GetConvar('web_baseUrl', '') }
+end)
+
+AddEventHandler('playerDropped', function()
+    local src = source
+    for token, slot in pairs(slots) do
+        if slot.src == src then slots[token] = nil end
+    end
+end)
+
+-- The Cfx.re proxy (*.users.cfx.re) already sends Access-Control-Allow-Origin; a second one makes the browser block it.
+local function viaProxy(req)
+    for name, value in pairs(req.headers or {}) do
+        local key = tostring(name):lower()
+        if key == 'host' and tostring(value):find('users%.cfx%.re') then return true end
+        if key == 'x-forwarded-for' or key == 'x-cfx-source-ip' then return true end
+    end
+    return false
+end
+
+local function reply(req, res, status, body)
+    local headers = { ['Content-Type'] = 'application/json' }
+    if not viaProxy(req) then
+        headers['Access-Control-Allow-Origin'] = '*'
+        headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    end
+    res.writeHead(status, headers)
+    res.send(json.encode(body))
+end
+
+SetHttpHandler(function(req, res)
+    if req.method == 'OPTIONS' then return reply(req, res, 204, {}) end
+    if req.method == 'GET' and req.path == '/ping' then return reply(req, res, 200, { ok = true }) end
+    if req.method ~= 'POST' then return reply(req, res, 404, { ok = false }) end
+
+    local token, part, total = tostring(req.path):match('^/upload/(%x+)/(%d+)/(%d+)$')
+    local slot = token and slots[token]
+    if not slot then return reply(req, res, 403, { ok = false, error = 'envio expirado' }) end
+
+    part, total = math.tointeger(tonumber(part)), math.tointeger(tonumber(total))
+    if not part or not total or part ~= #slot.parts + 1 or part > total or slot.busy or os.time() > slot.expires then
+        slots[token] = nil
+        return reply(req, res, 403, { ok = false, error = 'envio fora de ordem' })
+    end
+
+    slot.busy = true
+    req.setDataHandler(function(body)
+        slot.busy = false
+        if slots[token] ~= slot then return reply(req, res, 403, { ok = false, error = 'envio expirado' }) end
+        if type(body) ~= 'string' or #body > PART_BYTES or slot.received + #body > slot.size then
+            slots[token] = nil
+            return reply(req, res, 413, { ok = false, error = 'arquivo maior que o informado' })
+        end
+
+        slot.parts[part] = body
+        slot.received = slot.received + #body
+        slot.expires = os.time() + SLOT_TTL
+        if part < total then return reply(req, res, 200, { ok = true }) end
+
+        slots[token] = nil
+        if slot.received ~= slot.size then return reply(req, res, 400, { ok = false, error = 'arquivo incompleto' }) end
+
+        local data = table.concat(slot.parts)
+        -- Length must be explicit: -1 stops at the first zero byte and saves an empty video.
+        if not SaveResourceFile(cache.resource, slot.path, data, #data) then
+            return reply(req, res, 500, { ok = false, error = 'falha ao gravar' })
+        end
+
+        pendingRestart = true
+        lib.print.info(('%s enviou %s (%.1f MB)'):format(GetPlayerName(slot.src) or slot.src, slot.path, #data / 1048576))
+        reply(req, res, 200, { ok = true, name = slot.name })
+    end, 'binary')
+end)
+
+CreateThread(function()
+    while true do
+        Wait(30000)
+        local now = os.time()
+        for token, slot in pairs(slots) do
+            if now > slot.expires then slots[token] = nil end
+        end
+    end
 end)
 
 -- Panel as a mri_Qadmin plugin; RegisterPlugin is idempotent by id, so all three paths are safe.

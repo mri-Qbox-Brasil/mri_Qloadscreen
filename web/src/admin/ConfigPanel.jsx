@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { ArrowDown, ArrowUp, Film, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Users, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowDown, ArrowUp, Film, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, X } from 'lucide-react'
 import {
   MriButton,
   MriCard,
@@ -15,6 +15,7 @@ import {
 import { isEnvBrowser } from '../lib/assets'
 import { DEV_CONFIG } from '../lib/devConfig'
 import { fetchNui } from '../lib/nui'
+import { uploadFile } from '../lib/upload'
 import { LoadScreen } from '../loadscreen/LoadScreen'
 import { ScaledStage } from '../loadscreen/ScaledStage'
 
@@ -52,6 +53,45 @@ function ListActions({ index, length, onMove, onRemove }) {
         <Trash2 className="h-4 w-4" />
       </MriButton>
     </div>
+  )
+}
+
+const UPLOAD_ACCEPT = { video: '.mp4,.webm', audio: '.mp3,.ogg,.wav' }
+
+function UploadButton({ kind, onUploaded, onStatus }) {
+  const inputRef = useRef(null)
+  const [progress, setProgress] = useState(null)
+
+  const onPick = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setProgress(0)
+    onStatus(null)
+    try {
+      const name = await uploadFile(file, kind, setProgress)
+      onUploaded(name)
+      onStatus({ type: 'ok', text: `${name} enviado. Clique em Salvar pra valer.` })
+    } catch (err) {
+      onStatus({ type: 'error', text: `Não foi possível enviar: ${err.message}` })
+    }
+    setProgress(null)
+  }
+
+  return (
+    <>
+      <input ref={inputRef} type="file" accept={UPLOAD_ACCEPT[kind]} className="hidden" onChange={onPick} />
+      <MriButton
+        size="sm"
+        variant="outline"
+        className="h-9 shrink-0"
+        disabled={progress !== null || isEnvBrowser()}
+        onClick={() => inputRef.current?.click()}
+      >
+        <Upload className="mr-1.5 h-4 w-4" />
+        {progress !== null ? `${Math.round(progress * 100)}%` : 'Enviar'}
+      </MriButton>
+    </>
   )
 }
 
@@ -185,7 +225,7 @@ export function ConfigPanel({ onClose }) {
           <Section
             icon={Film}
             title="Vídeos e músicas"
-            description="Tocam em sequência. Arquivo em config/video/ e config/audio/, ou link."
+            description="Tocam em sequência. Envie o arquivo pelo botão (até 100 MB) ou use um link."
             action={
               <MriButton size="sm" variant="outline" onClick={() => patch('tracks', [...draft.tracks, { ...EMPTY_TRACK }])}>
                 <Plus className="mr-1 h-4 w-4" /> Faixa
@@ -204,13 +244,19 @@ export function ConfigPanel({ onClose }) {
                     onRemove={(index) => patch('tracks', draft.tracks.filter((_, j) => j !== index))}
                   />
                 </div>
-                <MriInput value={track.video} placeholder="Vídeo: video.mp4 ou https://..." onChange={(e) => setTrack(i, 'video', e.target.value)} />
+                <div className="flex items-center gap-2">
+                  <MriInput className="flex-1" value={track.video} placeholder="Vídeo: video.mp4 ou https://..." onChange={(e) => setTrack(i, 'video', e.target.value)} />
+                  <UploadButton kind="video" onUploaded={(name) => setTrack(i, 'video', name)} onStatus={setStatus} />
+                </div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm">Usar o som do vídeo</span>
                   <MriSwitch size="sm" checked={track.useVideoAudio} onCheckedChange={(v) => setTrack(i, 'useVideoAudio', v)} aria-label="Usar o som do vídeo" />
                 </div>
                 {!track.useVideoAudio && (
-                  <MriInput value={track.audio} placeholder="Música: musica.mp3 ou https://..." onChange={(e) => setTrack(i, 'audio', e.target.value)} />
+                  <div className="flex items-center gap-2">
+                    <MriInput className="flex-1" value={track.audio} placeholder="Música: musica.mp3 ou https://..." onChange={(e) => setTrack(i, 'audio', e.target.value)} />
+                    <UploadButton kind="audio" onUploaded={(name) => setTrack(i, 'audio', name)} onStatus={setStatus} />
+                  </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <MriInput value={track.title} placeholder="Nome" onChange={(e) => setTrack(i, 'title', e.target.value)} />
