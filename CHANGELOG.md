@@ -1,3 +1,20 @@
+# [2.3.0](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.2.0...v2.3.0) (2026-10-14)
+
+
+### Bug Fixes
+
+* **config:** video padrao local, o link do Fivemanage estourou a banda ([9712a43](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/9712a4386b60e1c2375e38c6a4bbf5dbf88a7b91))
+* **panel:** reinicio depois do envio pelo mri_Qadmin, sem ACE de comando ([a38e794](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/a38e7949b4bb5a254577860b4be2af505fcc32d7))
+* **web:** tema do Qadmin antes da primeira pintura, pela ponte de plugin do ui-kit 4.35.0 ([5856eb3](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/5856eb3af022be457d1857da13a16cd011fae541))
+
+
+### Features
+
+* **panel:** envio de video e musica pelo painel do Qadmin ([4037884](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/40378848c349a6aca6b3bf70f247e282a1bddeca))
+* **panel:** lista dos arquivos enviados com opcao de apagar ([cfb30ed](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/cfb30ed4e94106c379a6ef4c602fe4aece813b92))
+* **panel:** ouvir o som da faixa na previa ([c52e2a8](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/c52e2a820dbe7c516182b54cfbcb343d8a51c973))
+* **panel:** previa em tela cheia por cima do jogo e envio da logo ([43f3cff](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/43f3cff91e0bfccc604bab3f9b9b3aa320f8acde))
+
 # [2.2.0](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.1.0...v2.2.0) (2026-10-04)
 
 
