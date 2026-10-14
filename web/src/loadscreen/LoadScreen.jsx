@@ -64,9 +64,9 @@ function StaffChip({ staff }) {
 
 /**
  * The loading screen itself, laid out for a 1080 px tall stage (see ScaledStage).
- * `preview` = inside the panel: silent, no keyboard, no audio element.
+ * `preview` = inside the panel: no keyboard, and silent unless `sound` is on.
  */
-export function LoadScreen({ config, progress, stage, preview = false }) {
+export function LoadScreen({ config, progress, stage, preview = false, sound = false }) {
   const tracks = config.tracks.filter((t) => t.video || t.audio)
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(true)
@@ -81,7 +81,8 @@ export function LoadScreen({ config, progress, stage, preview = false }) {
 
   const track = tracks.length ? tracks[index % tracks.length] : null
   const usesVideoAudio = Boolean(track?.useVideoAudio && track.video)
-  const hasAudioFile = !preview && !usesVideoAudio && Boolean(track?.audio)
+  const silent = preview && !sound
+  const hasAudioFile = !silent && !usesVideoAudio && Boolean(track?.audio)
   const mediaSrc = usesVideoAudio ? track.video : track?.audio
   const position = time.src === mediaSrc ? time : { current: 0, duration: 0 }
   const canSeek = hasAudioFile && position.duration > 0
@@ -95,7 +96,7 @@ export function LoadScreen({ config, progress, stage, preview = false }) {
   }, [volume, track])
 
   useEffect(() => {
-    if (preview) return
+    if (silent) return
     const el = activeMedia()
     if (!el) return
     if (!playing) {
@@ -109,7 +110,7 @@ export function LoadScreen({ config, progress, stage, preview = false }) {
       el.play().then(() => setTimeout(() => { el.muted = false }, 1000)).catch(() => {})
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, playing, preview, track?.video, track?.audio, usesVideoAudio])
+  }, [index, playing, silent, track?.video, track?.audio, usesVideoAudio])
 
   const restart = () => {
     const el = activeMedia()
@@ -165,7 +166,7 @@ export function LoadScreen({ config, progress, stage, preview = false }) {
           playsInline
           disablePictureInPicture
           loop={!usesVideoAudio}
-          muted={preview || !usesVideoAudio}
+          muted={silent || !usesVideoAudio}
           onLoadedData={() => setReadyVideo(track.video)}
           onTimeUpdate={usesVideoAudio ? onTime : undefined}
           onEnded={usesVideoAudio ? () => step(1) : undefined}

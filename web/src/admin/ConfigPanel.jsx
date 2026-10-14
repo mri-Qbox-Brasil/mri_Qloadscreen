@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowUp, Film, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Film, MonitorPlay, Plus, RotateCcw, Save, Trash2, Type, Upload, Users, Volume2, VolumeX, X } from 'lucide-react'
 import {
   MriButton,
   MriCard,
@@ -108,6 +108,7 @@ export function ConfigPanel({ onClose }) {
   const [draft, setDraft] = useState(null)
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState(null)
+  const [sound, setSound] = useState(false)
 
   useEffect(() => {
     const load = isEnvBrowser() ? Promise.resolve({ config: DEV_CONFIG, defaults: DEV_CONFIG }) : fetchNui('getConfig')
@@ -298,11 +299,19 @@ export function ConfigPanel({ onClose }) {
         </div>
 
         <div className="min-h-0 border-l border-border p-5">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prévia</p>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Prévia</p>
+            <MriButton size="sm" variant={sound ? 'default' : 'outline'} onClick={() => setSound((v) => !v)}>
+              {sound ? <Volume2 className="mr-1.5 h-4 w-4" /> : <VolumeX className="mr-1.5 h-4 w-4" />}
+              {sound ? 'Ouvindo' : 'Ouvir'}
+            </MriButton>
+          </div>
           <ScaledStage className="aspect-video w-full rounded-lg border border-border">
-            <LoadScreen config={draft} progress={62} stage="Carregando o mapa" preview />
+            <LoadScreen config={draft} progress={62} stage="Carregando o mapa" preview sound={sound} />
           </ScaledStage>
-          <p className="mt-2 text-xs text-muted-foreground">Sem som na prévia. Arquivos locais vêm das pastas em config/ do resource.</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            O som toca no volume inicial acima. Arquivo enviado aparece na prévia depois de salvar, quando a tela reinicia.
+          </p>
         </div>
       </div>
     </div>
