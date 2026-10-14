@@ -204,16 +204,8 @@ lib.callback.register('mri_Qloadscreen:getConfig', function(source)
     return { config = current, defaults = normalize(nil) }
 end)
 
--- Uploaded files only reach players after a restart (the client downloads the file list from resource start).
+-- Uploaded files only reach players after a restart; StopResource on itself is a no-op, so mri_Qadmin does it (client.lua).
 local pendingRestart = false
-
-local function restartSelf()
-    pendingRestart = false
-    SetTimeout(500, function()
-        ExecuteCommand('refresh')
-        ExecuteCommand('ensure ' .. cache.resource)
-    end)
-end
 
 lib.callback.register('mri_Qloadscreen:saveConfig', function(source, payload)
     if not isAdmin(source) then return false, 'sem permissão' end
@@ -223,8 +215,9 @@ lib.callback.register('mri_Qloadscreen:saveConfig', function(source, payload)
     if not save(config) then return false, 'falha ao salvar' end
 
     current = config
-    if pendingRestart then restartSelf() end
-    return true, current
+    local restart = pendingRestart
+    pendingRestart = false
+    return true, current, restart
 end)
 
 --------------------------------------------------------------------------------

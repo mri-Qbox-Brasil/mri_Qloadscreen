@@ -19,6 +19,13 @@ RegisterNUICallback('uploadStart', function(data, cb)
 end)
 
 RegisterNUICallback('saveConfig', function(data, cb)
-    local ok, result = lib.callback.await('mri_Qloadscreen:saveConfig', false, data)
-    cb({ ok = ok, config = ok and result or nil, error = not ok and result or nil })
+    local ok, result, restart = lib.callback.await('mri_Qloadscreen:saveConfig', false, data)
+    cb({ ok = ok, config = ok and result or nil, error = not ok and result or nil, restarted = restart == true })
+
+    -- New uploads join the players' download only after a restart, done by mri_Qadmin with the admin's own permission.
+    if restart and GetResourceState('mri_Qadmin') == 'started' then
+        SetTimeout(300, function()
+            lib.callback.await('mri_Qadmin:callback:ChangeResourceState', false, { name = GetCurrentResourceName(), state = 'restart' })
+        end)
+    end
 end)

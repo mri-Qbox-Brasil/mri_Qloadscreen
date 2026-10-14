@@ -145,7 +145,10 @@ export function ConfigPanel({ onClose }) {
     if (res?.ok) {
       setSaved(res.config)
       setDraft(res.config)
-      setStatus({ type: 'ok', text: 'Salvo. Vale a partir da próxima conexão.' })
+      setStatus({
+        type: 'ok',
+        text: res.restarted ? 'Salvo. A tela de carregamento reinicia para incluir os arquivos enviados.' : 'Salvo. Vale a partir da próxima conexão.',
+      })
     } else {
       setStatus({ type: 'error', text: res?.error ? `Não foi possível salvar: ${res.error}` : 'Não foi possível salvar.' })
     }
