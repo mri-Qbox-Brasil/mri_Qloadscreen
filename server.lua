@@ -19,7 +19,7 @@ local defaults = {
     staff = { enabled = true, members = {} },
     tracks = {
         {
-            video = 'https://r2.fivemanage.com/NPYjK3TScd7LGsz8PIbt3/GTA6.mp4',
+            video = 'video.mp4',
             useVideoAudio = true,
             audio = '',
             title = 'GTA6',
