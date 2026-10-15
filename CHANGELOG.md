@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.3.1...v2.3.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* **upload:** envio pela conexao do jogo quando o painel nao alcanca o servidor por http ([f246992](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/f24699288b3d5a5c9d4f7df8bb8e811198c8de9f))
+
 ## [2.3.1](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.3.0...v2.3.1) (2026-10-15)
 
 
