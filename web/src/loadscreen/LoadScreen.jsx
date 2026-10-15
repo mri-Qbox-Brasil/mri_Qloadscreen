@@ -77,6 +77,7 @@ export function LoadScreen({ config, progress, stage, preview = false, sound = f
   const [readyVideo, setReadyVideo] = useState('')
   const videoRef = useRef(null)
   const audioRef = useRef(null)
+  const failedVideos = useRef(new Set())
   const staff = useStaff(config.staff)
 
   const track = tracks.length ? tracks[index % tracks.length] : null
@@ -124,6 +125,14 @@ export function LoadScreen({ config, progress, stage, preview = false, sound = f
     else restart()
   }
 
+  // Skip a video the CEF can't play; stops once every video failed so it never loops on errors.
+  const onVideoError = (e) => {
+    console.error(`[mri_Qloadscreen] video failed: ${track.video} (code ${e.currentTarget.error?.code ?? '?'})`)
+    failedVideos.current.add(track.video)
+    const videos = new Set(tracks.filter((t) => t.video).map((t) => t.video))
+    if (tracks.length > 1 && failedVideos.current.size < videos.size) step(1)
+  }
+
   const onTime = (e) => setTime({ src: mediaSrc, current: e.currentTarget.currentTime, duration: e.currentTarget.duration || 0 })
 
   const seek = (e) => {
@@ -168,6 +177,7 @@ export function LoadScreen({ config, progress, stage, preview = false, sound = f
           loop={!usesVideoAudio}
           muted={silent || !usesVideoAudio}
           onLoadedData={() => setReadyVideo(track.video)}
+          onError={onVideoError}
           onTimeUpdate={usesVideoAudio ? onTime : undefined}
           onEnded={usesVideoAudio ? () => step(1) : undefined}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${videoReady ? 'opacity-100' : 'opacity-0'}`}

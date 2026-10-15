@@ -415,6 +415,7 @@ SetHttpHandler(function(req, res)
         if not SaveResourceFile(cache.resource, slot.path, data, #data) then
             return reply(req, res, 500, { ok = false, error = 'falha ao gravar' })
         end
+        if slot.path:find('^config/video/.+%.mp4$') then exports[cache.resource]:faststartVideo(slot.name) end
 
         pendingRestart = true
         lib.print.info(('%s enviou %s (%.1f MB)'):format(GetPlayerName(slot.src) or slot.src, slot.path, #data / 1048576))
