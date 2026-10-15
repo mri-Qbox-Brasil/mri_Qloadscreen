@@ -1,3 +1,11 @@
+## [2.3.1](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.3.0...v2.3.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* **config:** video padrao com o moov no inicio, o CEF nao tocava pelo nui ([d60f4d7](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/d60f4d7f71b78516491047de3f5a17db51030a61))
+* **video:** servidor poe o moov no inicio do mp4 e a tela pula o video que falha ([d94486b](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/d94486b4bf7b3636e1181bf7c49b33bd887f468b))
+
 # [2.3.0](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.2.0...v2.3.0) (2026-10-14)
 
 
