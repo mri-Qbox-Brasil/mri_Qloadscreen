@@ -26,6 +26,12 @@ exports('deleteUploadFile', (folder, name) => {
   }
 });
 
+// Lua has no fast base64 decoder; an ArrayBuffer reaches Lua as a byte string (a Buffer arrives as a table).
+exports('decodeBase64', (data) => {
+  const buf = Buffer.from(String(data), 'base64');
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+});
+
 function readBoxes(buf, start, end) {
   const boxes = [];
   let off = start;

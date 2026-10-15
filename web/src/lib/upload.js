@@ -17,17 +17,16 @@ async function pickBase(urls) {
   return null
 }
 
-/**
- * Sends a file to config/<kind>/ on the server, in parts; resolves to the saved file name.
- * `onProgress` gets 0..1.
- */
-export async function uploadFile(file, kind, onProgress) {
-  const start = await fetchNui('uploadStart', { kind, name: file.name, size: file.size })
-  if (!start?.ok) throw new Error(start?.error || 'o servidor recusou o envio')
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).slice(String(reader.result).indexOf(',') + 1))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
 
-  const base = await pickBase(start.urls || [])
-  if (!base) throw new Error('o servidor não respondeu pelo HTTP (porta ou web_baseUrl)')
-
+async function sendByHttp(file, start, base, onProgress) {
   const total = Math.max(1, Math.ceil(file.size / start.partBytes))
   let last = null
   for (let part = 1; part <= total; part++) {
@@ -37,5 +36,32 @@ export async function uploadFile(file, kind, onProgress) {
     if (!res.ok || !last?.ok) throw new Error(last?.error || `falha no envio (${res.status})`)
     onProgress?.(part / total)
   }
+  return last
+}
+
+/** Through the game connection: slower, but works for an admin who isn't on the server's PC. */
+async function sendByGame(file, start, onProgress) {
+  const size = start.eventPartBytes
+  const total = Math.max(1, Math.ceil(file.size / size))
+  let last = null
+  for (let part = 1; part <= total; part++) {
+    const data = await toBase64(file.slice((part - 1) * size, part * size))
+    last = await fetchNui('uploadPart', { token: start.token, part, total, data })
+    if (!last?.ok) throw new Error(last?.error || 'falha no envio')
+    onProgress?.(part / total)
+  }
+  return last
+}
+
+/**
+ * Sends a file to config/<kind>/ on the server, in parts; resolves to the saved file name.
+ * `onProgress` gets 0..1.
+ */
+export async function uploadFile(file, kind, onProgress) {
+  const start = await fetchNui('uploadStart', { kind, name: file.name, size: file.size })
+  if (!start?.ok) throw new Error(start?.error || 'o servidor recusou o envio')
+
+  const base = await pickBase(start.urls || [])
+  const last = base ? await sendByHttp(file, start, base, onProgress) : await sendByGame(file, start, onProgress)
   return last.name || start.name
 }
