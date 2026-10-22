@@ -1,3 +1,10 @@
+## [2.3.3](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.3.2...v2.3.3) (2026-10-22)
+
+
+### Bug Fixes
+
+* **tema:** loadscreen espera os dados da conexao antes de aplicar cor e design do /uiconfig ([a3133cf](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/commit/a3133cffffad094e036655ced2ae96539910005a))
+
 ## [2.3.2](https://github.com/mri-Qbox-Brasil/mri_Qloadscreen/compare/v2.3.1...v2.3.2) (2026-10-15)
 
 

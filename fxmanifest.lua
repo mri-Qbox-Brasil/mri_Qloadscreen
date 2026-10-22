@@ -4,7 +4,7 @@ game 'gta5'
 
 author 'MRI BRASIL'
 description 'mri_Qloadscreen'
-version '2.3.2'
+version '2.3.3'
 
 loadscreen 'html/index.html'
 loadscreen_cursor 'yes'
