@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isEnvBrowser } from './lib/assets'
 import { DEV_CONFIG } from './lib/devConfig'
+import { getHandover, onHandover } from './lib/handover'
 import { LoadScreen } from './loadscreen/LoadScreen'
 import { ScaledStage } from './loadscreen/ScaledStage'
 
@@ -14,9 +15,11 @@ const STAGES = {
 }
 
 export default function App() {
-  const config = window.nuiHandoverData?.config ?? DEV_CONFIG
+  const [config, setConfig] = useState(() => getHandover()?.config ?? DEV_CONFIG)
   const [progress, setProgress] = useState(0)
   const [stage, setStage] = useState(isEnvBrowser() ? STAGES.MAP : '')
+
+  useEffect(() => onHandover((data) => data.config && setConfig(data.config)), [])
 
   useEffect(() => {
     const onMessage = ({ data }) => {
